@@ -3,14 +3,9 @@
 
 #include <vector>
 #include <iterator>
+#include "sml/ext/functional.hpp"
 #include "sml/iterator/next.hpp"
 #include "sml/iterator/prior.hpp"
-
-#ifdef __GNUC__
-#if __GNUC__ == 4 && __GNUC_MINOR__ <= 6
-#include <tr1/functional>
-#endif
-#endif
 
 namespace sml { namespace sorting {
 
@@ -22,16 +17,11 @@ counting_sort(
   const RandomAccessIterator result,
   Encoder              encoder
 ) {
-#ifdef __GNUC__
-#if __GNUC__ == 4 && __GNUC_MINOR__ <= 6
-  using std::tr1::result_of;
-#endif
-#endif
   using iterator::next;
   using iterator::prior;
 
   typedef typename std::iterator_traits<InputIterator>::value_type value_type;
-  typedef typename result_of<Encoder(value_type)>::type encode_type;
+  typedef typename ext::result_of<Encoder(value_type)>::type encode_type;
   typedef
     typename std::vector<CountType>::iterator
     count_iterator;
