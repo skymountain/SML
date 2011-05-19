@@ -8,6 +8,6 @@ Iterator prior(Iterator iter) {
   return --iter;
 }
 
-}} // namespace
+}} // namespace sml::iterator
 
 #endif

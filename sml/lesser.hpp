@@ -6,6 +6,8 @@ namespace sml {
 class lesser {
 public:
 
+  typedef bool result_type;
+
   template<class T>
   bool operator()(T& a, T& b) const {
     return a < b;

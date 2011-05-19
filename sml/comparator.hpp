@@ -17,6 +17,7 @@ public:
   int operator()(const T& a, const T& b) const {
     return a < b ? -1 : a > b ? 1 : 0;
   }
+
 }; // class comparator
 
 } // namespace sml
