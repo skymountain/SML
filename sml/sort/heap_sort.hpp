@@ -53,7 +53,7 @@ heap_sort(const Iterator begin, const Iterator end, Lesser lesser) {
 
 template<class Iterator>
 Iterator heap_sort(const Iterator begin, const Iterator end) {
-  return heap_sort(begin, end, lesser());
+  return sml::sorting::heap_sort(begin, end, lesser());
 }
 
 }} // namespace sml::sorting

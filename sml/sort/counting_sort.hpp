@@ -64,7 +64,9 @@ counting_sort(
   const RandomAccessIterator result,
   Encoder              encoder
 ) {
-  return counting_sort<long, InputIterator, RandomAccessIterator, Encoder>(begin, end, result, encoder);
+  return sml::sorting::counting_sort<
+    long, InputIterator, RandomAccessIterator, Encoder
+  >(begin, end, result, encoder);
 }
 
 }} // namespace sml::sorting
