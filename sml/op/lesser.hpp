@@ -1,7 +1,7 @@
-#ifndef _SML_LESSER_HPP
-#define _SML_LESSER_HPP
+#ifndef _SML_OP_LESSER_HPP
+#define _SML_OP_LESSER_HPP
 
-namespace sml {
+namespace sml { namespace op {
 
 class lesser {
 public:
@@ -20,6 +20,6 @@ public:
 
 }; // class lesser
 
-} // namespace sml
+}} // namespace sml::op
 
 #endif

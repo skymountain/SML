@@ -3,7 +3,7 @@
 
 #include <iterator>
 #include "sml/ext/functional.hpp"
-#include "sml/comparator.hpp"
+#include "sml/op/comparator.hpp"
 
 namespace sml { namespace algorithm {
 
@@ -19,7 +19,7 @@ binary_search(
   typedef typename traits_type::difference_type difference_type;
   typedef typename traits_type::value_type      value_type;
   typedef
-    typename ext::result_of<Comparator(T, value_type)>::type
+    typename sml::ext::result_of<Comparator(T, value_type)>::type
     result_type;
 
   const difference_type n = end - begin;
@@ -46,7 +46,7 @@ binary_search(
 
 template<class Iterator, class T>
 Iterator binary_search(const Iterator begin, const Iterator end, const T& v) {
-  return sml::algorithm::binary_search(begin, end, v, comparator());
+  return sml::algorithm::binary_search(begin, end, v, sml::op::comparator());
 }
 
 }} // namespace sml::algorithm

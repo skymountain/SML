@@ -17,11 +17,11 @@ counting_sort(
   const RandomAccessIterator result,
   Encoder              encoder
 ) {
-  using iterator::next;
-  using iterator::prior;
+  using sml::iterator::next;
+  using sml::iterator::prior;
 
   typedef typename std::iterator_traits<InputIterator>::value_type value_type;
-  typedef typename ext::result_of<Encoder(value_type)>::type encode_type;
+  typedef typename sml::ext::result_of<Encoder(value_type)>::type encode_type;
   typedef
     typename std::vector<CountType>::iterator
     count_iterator;

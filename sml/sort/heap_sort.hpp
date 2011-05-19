@@ -2,7 +2,7 @@
 #define _SML_SORT_HEAP_HPP
 
 #include <utility>
-#include "sml/lesser.hpp"
+#include "sml/op/lesser.hpp"
 
 namespace sml { namespace sorting {
 
@@ -53,7 +53,7 @@ heap_sort(const Iterator begin, const Iterator end, Lesser lesser) {
 
 template<class Iterator>
 Iterator heap_sort(const Iterator begin, const Iterator end) {
-  return sml::sorting::heap_sort(begin, end, lesser());
+  return sml::sorting::heap_sort(begin, end, sml::op::lesser());
 }
 
 }} // namespace sml::sorting

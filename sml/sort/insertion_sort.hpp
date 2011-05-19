@@ -3,17 +3,17 @@
 
 #include <algorithm>
 #include <iterator>
-#include "sml/lesser.hpp"
 #include "sml/iterator/next.hpp"
 #include "sml/iterator/prior.hpp"
+#include "sml/op/lesser.hpp"
 
 namespace sml { namespace sorting {
 
 template<class Iterator, class Lesser>
 Iterator
 insertion_sort(const Iterator begin, const Iterator end, Lesser lesser) {
-  using iterator::next;
-  using iterator::prior;
+  using sml::iterator::next;
+  using sml::iterator::prior;
 
   typedef typename std::iterator_traits<Iterator>::value_type value_type;
 
@@ -40,7 +40,7 @@ insertion_sort(const Iterator begin, const Iterator end, Lesser lesser) {
 
 template<class Iterator>
 Iterator insertion_sort(const Iterator begin, const Iterator end) {
-  return sml::sorting::insertion_sort(begin, end, lesser());
+  return sml::sorting::insertion_sort(begin, end, sml::op::lesser());
 }
 
 }} // namespace sml::sorting

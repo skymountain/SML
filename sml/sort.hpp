@@ -3,8 +3,8 @@
 
 #include <iterator>
 #include <utility>
+#include "sml/op/lesser.hpp"
 #include "sml/sort/insertion_sort.hpp"
-#include "sml/lesser.hpp"
 
 namespace sml { namespace detail {
 
@@ -57,12 +57,12 @@ void _sort(const Iterator begin, const Iterator end, Lesser lesser) {
 template<class Iterator, class Lesser>
 Iterator sort(const Iterator begin, const Iterator end, Lesser lesser) {
   detail::_sort(begin, end, lesser);
-  return sorting::insertion_sort(begin, end, lesser);
+  return sml::sorting::insertion_sort(begin, end, lesser);
 }
 
 template<class Iterator>
 Iterator sort(const Iterator begin, const Iterator end) {
-  return sml::sort(begin, end, lesser());
+  return sml::sort(begin, end, sml::op::lesser());
 }
 
 } // namespace sml
