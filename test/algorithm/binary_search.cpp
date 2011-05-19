@@ -1,14 +1,10 @@
-#include <algorithm>
 #include <vector>
-#include <cstdlib>
 #include <gtest/gtest.h>
 #include "sml/algorithm/binary_search.hpp"
 
 namespace {
 
-using std::sort;
 using std::vector;
-using std::rand;
 
 template<class Iterator>
 void find_in_range(const Iterator begin, const Iterator end) {
@@ -28,14 +24,14 @@ void no_find_in_range(
   }
 }
 
-TEST(SmlSort, InEmptyArray) {
+TEST(BinarySearch, InEmptyArray) {
   int seq[0] = {};
 
   int* res   = sml::algorithm::binary_search(seq, seq, 0);
   ASSERT_EQ(seq, res);
 }
 
-TEST(SmlSort, EmptyRangeInArray) {
+TEST(BinarySearch, EmptyRangeInArray) {
   SCOPED_TRACE("EmptyRangeInArray");
 
   int seq[3] = {1, 2, 3};
@@ -48,7 +44,7 @@ TEST(SmlSort, EmptyRangeInArray) {
   ASSERT_EQ(3, seq[2]);
 }
 
-TEST(SmlSort, InEmptyVector) {
+TEST(BinarySearch, InEmptyVector) {
   vector<char> seq;
 
   vector<char>::iterator res =
@@ -58,7 +54,7 @@ TEST(SmlSort, InEmptyVector) {
   ASSERT_EQ(0, seq.size());
 }
 
-TEST(SmlSort, OneInArray) {
+TEST(BinarySearch, OneInArray) {
   SCOPED_TRACE("OneInArray");
 
   int seq[1] = {3};
@@ -70,7 +66,7 @@ TEST(SmlSort, OneInArray) {
   ASSERT_EQ(3, seq[0]);
 }
 
-TEST(SmlSort, OneInVector) {
+TEST(BinarySearch, OneInVector) {
   SCOPED_TRACE("OneInVector");
 
   vector<char> seq;
@@ -85,7 +81,7 @@ TEST(SmlSort, OneInVector) {
   ASSERT_EQ('B', seq[0]);
 }
 
-TEST(SmlSort, InArray) {
+TEST(BinarySearch, InArray) {
   SCOPED_TRACE("InArray");
 
   int seq[5] = {21, 50, 71, 88, 102};
@@ -101,7 +97,7 @@ TEST(SmlSort, InArray) {
   ASSERT_EQ(102, seq[4]);
 }
 
-TEST(SmlSort, RangeInArray) {
+TEST(BinarySearch, RangeInArray) {
   SCOPED_TRACE("RangeInArray");
 
   int seq[5] = {71, 21, 50, 102, 88};
@@ -117,7 +113,7 @@ TEST(SmlSort, RangeInArray) {
   ASSERT_EQ(88,  seq[4]);
 }
 
-TEST(SmlSort, RangeInVector) {
+TEST(BinarySearch, RangeInVector) {
   SCOPED_TRACE("RangeInVector");
 
   vector<char> seq;
@@ -138,14 +134,14 @@ TEST(SmlSort, RangeInVector) {
   ASSERT_EQ('C', seq[5]);
 }
 
-TEST(SmlSort, InArrayOf2ndPower) {
+TEST(BinarySearch, InArrayOf2ndPower) {
   SCOPED_TRACE("InArrayOf2ndPower");
 
   int seq[8] = {8, 21, 42, 50, 71, 88, 91, 102};
   find_in_range(seq, seq+8);
 
   int no_seq[3] = {13, 79, 112};
-  no_find_in_range(seq, seq+7, no_seq, no_seq+3);
+  no_find_in_range(seq, seq+8, no_seq, no_seq+3);
 
   ASSERT_EQ(8,   seq[0]);
   ASSERT_EQ(21,  seq[1]);
@@ -157,7 +153,7 @@ TEST(SmlSort, InArrayOf2ndPower) {
   ASSERT_EQ(102, seq[7]);
 }
 
-TEST(SmlSort, InArrayOf2ndPowerMinus1) {
+TEST(BinarySearch, InArrayOf2ndPowerMinus1) {
   SCOPED_TRACE("InArrayOf2ndPowerMinus1");
 
   int seq[7] = {8, 21, 42, 50, 71, 88, 102};
@@ -175,7 +171,7 @@ TEST(SmlSort, InArrayOf2ndPowerMinus1) {
   ASSERT_EQ(102, seq[6]);
 }
 
-TEST(SmlSort, InArrayOf2ndPowerMinus2) {
+TEST(BinarySearch, InArrayOf2ndPowerMinus2) {
   SCOPED_TRACE("InArrayOf2ndPowerMinus2");
 
   int seq[6] = {8, 21, 50, 71, 88, 102};
