@@ -5,7 +5,7 @@
 #include <utility>
 #include "sml/lesser.hpp"
 
-namespace sml {
+namespace sml { namespace algorithm {
 
 template<class Iterator, class Lesser>
 std::pair<Iterator, Iterator>
@@ -44,9 +44,9 @@ min_max(const Iterator begin, const Iterator end, Lesser lesser) {
 template<class Iterator>
 std::pair<Iterator, Iterator>
 min_max(const Iterator begin, const Iterator end) {
-  return min_max(begin, end, lesser());
+  return sml::algorithm::min_max(begin, end, lesser());
 }
 
-} // nemespace sml
+}} // nemespace sml::algorithm
 
 #endif

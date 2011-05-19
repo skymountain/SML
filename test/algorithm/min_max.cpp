@@ -10,7 +10,7 @@ using std::pair;
 
 TEST(MinMax, InEmptyArray) {
   int seq[0] = {};
-  pair<int*, int*> res = sml::min_max(seq, seq);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq);
 
   ASSERT_EQ(seq, res.first);
   ASSERT_EQ(seq, res.second);
@@ -18,7 +18,7 @@ TEST(MinMax, InEmptyArray) {
 
 TEST(MinMax, EmptyRangeInArray) {
   int seq[3] = {3, 1, 2};
-  pair<int*, int*> res = sml::min_max(seq+1, seq+1);
+  pair<int*, int*> res = sml::algorithm::min_max(seq+1, seq+1);
 
   ASSERT_EQ(seq+1, res.first);
   ASSERT_EQ(seq+1, res.second);
@@ -27,7 +27,7 @@ TEST(MinMax, EmptyRangeInArray) {
 TEST(MinMax, InEmptyVector) {
   typedef vector<char>::iterator iterator;
   vector<char> seq;
-  pair<iterator, iterator> res = sml::min_max(seq.begin(), seq.end());
+  pair<iterator, iterator> res = sml::algorithm::min_max(seq.begin(), seq.end());
 
   ASSERT_EQ(seq.begin(), res.first);
   ASSERT_EQ(seq.begin(), res.second);
@@ -35,7 +35,7 @@ TEST(MinMax, InEmptyVector) {
 
 TEST(MinMax, OneInArray) {
   int seq[1] = {3};
-  pair<int*, int*> res = sml::min_max(seq, seq+1);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq+1);
 
   ASSERT_EQ(seq, res.first);
   ASSERT_EQ(seq, res.second);
@@ -47,7 +47,7 @@ TEST(MinMax, OneInVector) {
   typedef vector<char>::iterator iterator;
   vector<char> seq;
   seq.push_back('A');
-  pair<iterator, iterator> res = sml::min_max(seq.begin(), seq.end());
+  pair<iterator, iterator> res = sml::algorithm::min_max(seq.begin(), seq.end());
 
   ASSERT_EQ(seq.begin(), res.first);
   ASSERT_EQ(seq.begin(), res.second);
@@ -57,7 +57,7 @@ TEST(MinMax, OneInVector) {
 
 TEST(MinMax, TwoInArray) {
   int seq[2] = {3, 1};
-  pair<int*, int*> res = sml::min_max(seq, seq+2);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq+2);
 
   ASSERT_EQ(seq+1, res.first);
   ASSERT_EQ(seq,   res.second);
@@ -70,7 +70,7 @@ TEST(MinMax, TwoInVector) {
   vector<char> seq;
   seq.push_back('A');
   seq.push_back('Z');
-  pair<iterator, iterator> res = sml::min_max(seq.begin(), seq.end());
+  pair<iterator, iterator> res = sml::algorithm::min_max(seq.begin(), seq.end());
 
   ASSERT_EQ(seq.begin(),   res.first);
   ASSERT_EQ(seq.begin()+1, res.second);
@@ -80,7 +80,7 @@ TEST(MinMax, TwoInVector) {
 
 TEST(MinMax, InArray) {
   int seq[5] = {102, 50, 88, 71, 21};
-  pair<int*, int*> res = sml::min_max(seq, seq+5);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq+5);
 
   ASSERT_EQ(seq+4, res.first);
   ASSERT_EQ(seq,   res.second);
@@ -90,7 +90,7 @@ TEST(MinMax, InArray) {
 
 TEST(MinMax, RangeInArray) {
   int seq[5] = {102, 50, 88, 71, 21};
-  pair<int*, int*> res = sml::min_max(seq+1, seq+4);
+  pair<int*, int*> res = sml::algorithm::min_max(seq+1, seq+4);
 
   ASSERT_EQ(seq+1, res.first);
   ASSERT_EQ(seq+2, res.second);
@@ -103,7 +103,7 @@ TEST(MinMax, RangeInVector) {
   vector<char> seq;
   seq.push_back('F'), seq.push_back('T'), seq.push_back('I'),
     seq.push_back('P'), seq.push_back('H'), seq.push_back('W');
-  pair<iterator, iterator> res = sml::min_max(seq.begin()+1, seq.end()-1);
+  pair<iterator, iterator> res = sml::algorithm::min_max(seq.begin()+1, seq.end()-1);
 
   ASSERT_EQ(seq.begin()+4, res.first);
   ASSERT_EQ(seq.begin()+1, res.second);
@@ -116,7 +116,7 @@ bool greater(const int& a, const int& b) {
 }
 TEST(MinMax, InReversedArray) {
   int seq[5] = {102, 50, 88, 71, 21};
-  pair<int*, int*> res = sml::min_max(seq, seq+5, greater);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq+5, greater);
 
   ASSERT_EQ(seq,   res.first);
   ASSERT_EQ(seq+4, res.second);
@@ -126,7 +126,7 @@ TEST(MinMax, InReversedArray) {
 
 TEST(MinMax, hasDuplicateMin) {
   int seq[5] = {102, 21, 88, 71, 21};
-  pair<int*, int*> res = sml::min_max(seq, seq+5);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq+5);
 
   ASSERT_EQ(seq+1, res.first);
   ASSERT_EQ(seq,   res.second);
@@ -136,7 +136,7 @@ TEST(MinMax, hasDuplicateMin) {
 
 TEST(MinMax, hasDuplicateMax) {
   int seq[5] = {102, 50, 88, 102, 21};
-  pair<int*, int*> res = sml::min_max(seq, seq+5);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq+5);
 
   ASSERT_EQ(seq+4, res.first);
   ASSERT_EQ(seq,   res.second);
@@ -146,7 +146,7 @@ TEST(MinMax, hasDuplicateMax) {
 
 TEST(MinMax, hasDuplicateMinMax) {
   int seq[5] = {102, 21, 88, 102, 21};
-  pair<int*, int*> res = sml::min_max(seq, seq+5);
+  pair<int*, int*> res = sml::algorithm::min_max(seq, seq+5);
 
   ASSERT_EQ(seq+1, res.first);
   ASSERT_EQ(seq,   res.second);
