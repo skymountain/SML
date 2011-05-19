@@ -1,8 +1,6 @@
-#include <iostream>
 #include <vector>
-#include <gtest/gtest.h>
 #include <cstdlib>
-#include <climits>
+#include <gtest/gtest.h>
 #include "sml/sort.hpp"
 
 namespace {
