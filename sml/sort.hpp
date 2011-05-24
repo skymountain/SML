@@ -42,11 +42,11 @@ void _sort(const Iterator begin, const Iterator end, Lesser lesser) {
     const difference_type right_size = right - pivot;
 
     if (right_size < left_size) {
-      _sort(pivot+1, right+1, lesser);
+      sml::detail::_sort(pivot+1, right+1, lesser);
       r = l + left_size - 1;
     }
     else {
-      _sort(left, pivot, lesser);
+      sml::detail::_sort(left, pivot, lesser);
       l = r - right_size + 1;
     }
   }
