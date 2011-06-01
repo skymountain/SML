@@ -9,6 +9,7 @@ namespace sml { namespace sorting {
 template<class Iterator, class Lesser>
 Iterator
 heap_sort(const Iterator begin, const Iterator end, Lesser lesser) {
+  using std::swap;
   typedef
     typename std::iterator_traits<Iterator>::difference_type
     difference_type;
@@ -20,12 +21,12 @@ heap_sort(const Iterator begin, const Iterator end, Lesser lesser) {
       const Iterator iter  = begin + j;
       const Iterator piter = begin + (j-1)/2;
       if (lesser(*iter, *piter)) break;
-      std::swap(*iter, *piter);
+      swap(*iter, *piter);
     }
   }
 
   for (difference_type i = n-1; i >= 1; --i) {
-    std::swap(*(begin+i), *begin);
+    swap(*(begin+i), *begin);
     difference_type j = 0;
     while (2*j + 1 < i) {
       difference_type max_idx = j;
@@ -43,7 +44,7 @@ heap_sort(const Iterator begin, const Iterator end, Lesser lesser) {
         break;
       }
 
-      std::swap(*(begin+max_idx), *(begin+j));
+      swap(*(begin+max_idx), *(begin+j));
       j = max_idx;
     }
   }

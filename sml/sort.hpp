@@ -10,6 +10,7 @@ namespace sml { namespace detail {
 
 template<class Iterator, class Lesser>
 void _sort(const Iterator begin, const Iterator end, Lesser lesser) {
+  using std::swap;
   typedef
     typename std::iterator_traits<Iterator>::difference_type
     difference_type;
@@ -27,17 +28,17 @@ void _sort(const Iterator begin, const Iterator end, Lesser lesser) {
                                 (lesser(*right,  *left)  ? left  : right)) :
                                (lesser(*left, *right)  ? left   :
                                 (lesser(*middle, *right) ? right : middle));
-    std::swap(*pre_pivot, *right);
+    swap(*pre_pivot, *right);
 
     Iterator pivot = left;
     for (Iterator it = left; it != right; ++it) {
       if (lesser(*it, *right)) {
-        std::swap(*pivot, *it);
+        swap(*pivot, *it);
         ++pivot;
       }
     }
 
-    std::swap(*pivot, *right);
+    swap(*pivot, *right);
     const difference_type left_size  =  pivot - left;
     const difference_type right_size = right - pivot;
 

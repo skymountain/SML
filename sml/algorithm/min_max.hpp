@@ -10,6 +10,7 @@ namespace sml { namespace algorithm {
 template<class Iterator, class Lesser>
 std::pair<Iterator, Iterator>
 min_max(const Iterator begin, const Iterator end, Lesser lesser) {
+  using std::swap;
   typedef
     typename std::iterator_traits<Iterator>::difference_type
     difference_type;
@@ -22,7 +23,7 @@ min_max(const Iterator begin, const Iterator end, Lesser lesser) {
   if (n % 2 == 0) {
     ++max, ++it;
     if (lesser(*max, *min)) {
-      std::swap(max, min);
+      swap(max, min);
     }
   }
 
