@@ -16,7 +16,6 @@ template<
   class Key,
   class T,
   class Lesser    = std::less<Key>,
-  /* XXX */
   class Allocator = std::allocator< std::pair<const Key, T> >
 >
 class red_black_tree {
@@ -45,19 +44,41 @@ public:
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
 private:
-  typedef sml::ext::shared_ptr<node> node_type;
-  typedef sml::ext::shared_ptr<node const> const_node_type;
-  typedef sml::ext::weak_ptr<node> parent_node_type;
-  typedef typename allocator_type::template rebind<node> node_allocator_type;
+  typedef sml::ext::shared_ptr<node>                        node_type;
+  typedef sml::ext::shared_ptr<node const>                  const_node_type;
+  typedef sml::ext::weak_ptr<node>                          parent_node_type;
   typedef sml::ext::tuple<node_type, node_type, node_type*> find_result_type;
 
+  typedef
+    typename allocator_type::template rebind<node>::other   node_allocator_type;
+  typedef typename node_allocator_type::pointer             node_ptr;
+
   class node :
-    sml::utility::noncopyable,
     public sml::ext::enable_shared_from_this<node> {
 
     friend class sml::red_black_tree<Key, T, Lesser, Allocator>;
 
   private:
+
+    class node_deleter {
+    public:
+      node_deleter(node_allocator_type& allocator) :
+        allocator_(allocator) {
+      }
+
+    private:
+      node_deleter() {}
+
+    public:
+      void operator()(const node_ptr np) {
+        this->allocator_.destroy(np);
+        this->allocator_.deallocate(np, 1);
+      }
+
+    private:
+      node_allocator_type& allocator_;
+    };
+
     node(
       const bool        red,
       const node_type&  parent,
@@ -73,6 +94,15 @@ private:
     }
 
   public:
+    node(const node& r) :
+      red_(r.red_),
+      value_(r.value_),
+      root_(r.root_),
+      parent_(r.parent_),
+      left_(r.left_),
+      right_(r.right_) {
+    }
+
     void right_rotate() {
       const node_type me         = this->shared_from_this();
       const node_type parent     = this->parent_.lock();
@@ -201,33 +231,43 @@ private:
 
   public:
     static node_type create_root(
+      node_allocator_type& allocator,
       const value_type& value,
       node_type&        root
     ) {
-      return node_type(new node(false, node_type(), value, root));
+      node_ptr np = allocator.allocate(1);
+      allocator.construct(np, node(false, node_type(), value, root));
+      return node_type(np, node_deleter(allocator));
     }
 
     static node_type create_node(
+      node_allocator_type& allocator,
       const node_type&  parent,
       const value_type& value,
       node_type&        root
     ) {
-      return node_type(new node(true, parent, value, root));
+      node_ptr np = allocator.allocate(1);
+      allocator.construct(np, node(true, parent, value, root));
+      return node_type(np, node_deleter(allocator));
     }
 
     static node_type clone_node(
+      node_allocator_type& allocator,
       const node_type& src,
       node_type&       root,
       key_compare&     lesser
     ) {
       if (!src) return node_type();
 
-      node_type dst(new node(src->red_, node_type(), src->value_, root));
-      node_type left  = clone_node(src->left_,  root, lesser);
-      node_type right = clone_node(src->right_, root, lesser);
+      node_ptr np = allocator.allocate(1);
+      allocator.construct(np, node(src->red_, node_type(), src->value_, root));
 
-      dst->left_    = left;
-      dst->right_   = right;
+      node_type dst   = node_type(np, node_deleter(allocator));
+      node_type left  = clone_node(allocator, src->left_,  root, lesser);
+      node_type right = clone_node(allocator, src->right_, root, lesser);
+
+      dst->left_  = left;
+      dst->right_ = right;
 
       if (left)  left->parent_  = dst;
       if (right) right->parent_ = dst;
@@ -561,7 +601,7 @@ private:
 
   std::pair<iterator, bool>
   insert_to_right_most_if_can(const value_type& value) {
-    if(
+    if (
       !this->empty() &&
       this->lesser_(this->right_most_->value_.first, value.first)
     ) {
@@ -642,11 +682,11 @@ private:
 
     if (!parent) {
       iter_node = this->root_ = this->left_most_ = this->right_most_ =
-        node::create_root(value, this->root_);
+        node::create_root(this->allocator_, value, this->root_);
     }
     else {
       iter_node = *inserted =
-        node::create_node(parent, value, this->root_);
+        node::create_node(this->allocator_, parent, value, this->root_);
 
       if (this->lesser_(value.first, this->left_most_->value_.first)) {
         this->left_most_ = iter_node;
@@ -904,7 +944,8 @@ private:
   }
 
   void copy_node(const red_black_tree& r) {
-    this->root_ = node::clone_node(r.root_, this->root_, this->lesser_);
+    this->root_ =
+      node::clone_node(this->allocator_, r.root_, this->root_, this->lesser_);
 
     if (this->root_) {
       this->left_most_  = this->root_->left_most_descendant();
@@ -912,14 +953,13 @@ private:
     }
   }
 
-  /* XXX */
   node_type      root_;
   node_type      left_most_;
   node_type      right_most_;
 
   size_type      size_;
   key_compare    lesser_;
-  allocator_type allocator_;
+  node_allocator_type allocator_;
 };
 
 template<class Key, class T, class Lesser, class Allocator>
