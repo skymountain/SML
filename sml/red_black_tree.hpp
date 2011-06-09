@@ -19,9 +19,9 @@ template<
   class Allocator = std::allocator< std::pair<const Key, T> >
 >
 class red_black_tree {
-
+private:
   class node;
-  template<class _T> class node_iterator;
+  template <class _V> class node_iterator;
 
 public:
   typedef Key                     key_type;
@@ -56,20 +56,13 @@ private:
   class node :
     public sml::ext::enable_shared_from_this<node> {
 
-    friend class sml::red_black_tree<Key, T, Lesser, Allocator>;
-
   private:
-
     class node_deleter {
     public:
       node_deleter(node_allocator_type& allocator) :
         allocator_(allocator) {
       }
 
-    private:
-      node_deleter() {}
-
-    public:
       void operator()(const node_ptr np) {
         this->allocator_.destroy(np);
         this->allocator_.deallocate(np, 1);
@@ -79,21 +72,8 @@ private:
       node_allocator_type& allocator_;
     };
 
-    node(
-      const bool        red,
-      const node_type&  parent,
-      const value_type& value,
-      node_type&        root
-    ) :
-      red_(red),
-      value_(value),
-      root_(root),
-      parent_(parent),
-      left_(),
-      right_() {
-    }
-
   public:
+    // copy constructor is public for Allocator::construct
     node(const node& r) :
       red_(r.red_),
       value_(r.value_),
@@ -102,6 +82,17 @@ private:
       left_(r.left_),
       right_(r.right_) {
     }
+
+    value_type& value()  { return this->value_; }
+
+    void rednize()       { this->red_ = true;  }
+    void blacknize()     { this->red_ = false; }
+
+    bool is_root() const { return this->parnet_; }
+    bool red()     const { return this->red_; }
+
+    node_type right_brother() const { return this->parent_.lock()->right_; }
+    node_type left_brother()  const { return this->parent_.lock()->left_;  }
 
     void right_rotate() {
       const node_type me         = this->shared_from_this();
@@ -139,29 +130,6 @@ private:
       }
 
       this->parent_reset(me, parent, right);
-    }
-
-    value_type& value() { return this->value_; }
-
-    void rednize()   { this->red_ = true;  }
-    void blacknize() { this->red_ = false; }
-
-    bool is_root() const { return this->parnet_; }
-    bool red()     const { return this->red_; }
-
-    node_type right_brother() const { return this->parent_.lock()->right_; }
-    node_type left_brother()  const { return this->parent_.lock()->left_;  }
-
-    node_type left_most_descendant() {
-      node_type node = this->shared_from_this();
-      while (node->left_) node = node->left_;
-      return node;
-    }
-
-    node_type right_most_descendant() {
-      node_type node = this->shared_from_this();
-      while (node->right_) node = node->right_;
-      return node;
     }
 
     node_type next() const {
@@ -204,36 +172,57 @@ private:
       return node_type();
     }
 
+    node_type left_most_descendant() {
+      node_type node = this->shared_from_this();
+      while (node->left_) node = node->left_;
+      return node;
+    }
+
+    node_type right_most_descendant() {
+      node_type node = this->shared_from_this();
+      while (node->right_) node = node->right_;
+      return node;
+    }
+
   private:
+    friend class sml::red_black_tree<Key, T, Lesser, Allocator>;
+
+    node(
+      const bool        red,
+      const node_type&  parent,
+      const value_type& value,
+      node_type&        root
+    ) :
+      red_(red),
+      value_(value),
+      root_(root),
+      parent_(parent),
+      left_(),
+      right_() {
+    }
+
     void parent_reset(
       const node_type& me,
       const node_type& parent,
       const node_type& node
     ) {
-      if (!parent) {
-        this->root_ = node;
-      }
-      else if (parent->left_ == me) {
-        parent->left_ = node;
-      }
-      else {
-        parent->right_ = node;
-      }
+      if (!parent) this->root_ = node;
+      else if (parent->left_ == me) parent->left_ = node;
+      else parent->right_ = node;
     }
 
-    bool red_;
+    bool       red_;
     value_type value_;
     node_type& root_;
-
-    node_type left_;
-    node_type right_;
+    node_type  left_;
+    node_type  right_;
     parent_node_type parent_;
 
   public:
     static node_type create_root(
       node_allocator_type& allocator,
-      const value_type& value,
-      node_type&        root
+      const value_type&    value,
+      node_type&           root
     ) {
       node_ptr np = allocator.allocate(1);
       allocator.construct(np, node(false, node_type(), value, root));
@@ -242,9 +231,9 @@ private:
 
     static node_type create_node(
       node_allocator_type& allocator,
-      const node_type&  parent,
-      const value_type& value,
-      node_type&        root
+      const node_type&     parent,
+      const value_type&    value,
+      node_type&           root
     ) {
       node_ptr np = allocator.allocate(1);
       allocator.construct(np, node(true, parent, value, root));
@@ -253,9 +242,9 @@ private:
 
     static node_type clone_node(
       node_allocator_type& allocator,
-      const node_type& src,
-      node_type&       root,
-      key_compare&     lesser
+      const node_type&     src,
+      node_type&           root,
+      key_compare&         lesser
     ) {
       if (!src) return node_type();
 
@@ -280,8 +269,6 @@ private:
   class node_iterator :
     public std::iterator<std::bidirectional_iterator_tag, V> {
 
-    friend class sml::red_black_tree<Key, T, Lesser, Allocator>;
-
   public:
     node_iterator() :
       right_most_(),
@@ -293,21 +280,9 @@ private:
       node_(r.node_) {
     }
 
-  private:
-    explicit node_iterator(const red_black_tree& rb_tree) :
-      right_most_(rb_tree.right_most_),
-      node_() {
-    }
+    value_type& operator*()  const { return this->node_->value(); }
+    value_type* operator->() const { return &(node_->value()); }
 
-    node_iterator(
-      const red_black_tree& rb_tree,
-      const node_type& node
-    ) :
-      right_most_(rb_tree.right_most_),
-      node_(node) {
-    }
-
-  public:
     node_iterator& operator=(const node_iterator& r) {
       this->right_most_ = r.right_most_;
       this->node_       = r.node_;
@@ -344,10 +319,22 @@ private:
       return !(*this == r);
     }
 
-    value_type& operator*()  const { return this->node_->value(); }
-    value_type* operator->() const { return &(node_->value()); }
-
   private:
+    friend class sml::red_black_tree<Key, T, Lesser, Allocator>;
+
+    explicit node_iterator(const red_black_tree& rb_tree) :
+      right_most_(rb_tree.right_most_),
+      node_() {
+    }
+
+    node_iterator(
+      const red_black_tree& rb_tree,
+      const node_type& node
+    ) :
+      right_most_(rb_tree.right_most_),
+      node_(node) {
+    }
+
     node_type right_most_;
     node_type node_;
   };
@@ -355,11 +342,6 @@ private:
 public:
   class value_compare :
     public std::binary_function<value_type, value_type, bool> {
-
-    friend class red_black_tree;
-
-  private:
-    value_compare(const key_compare& lesser) : lesser_(lesser) {}
 
   public:
     bool operator()(const value_type& x, const value_type& y) const {
@@ -371,9 +353,14 @@ public:
     }
 
   private:
+    friend class red_black_tree;
+
+    value_compare(const key_compare& lesser) : lesser_(lesser) {}
+
     key_compare lesser_;
   };
 
+public:
   explicit red_black_tree(
     const key_compare&    lesser    = key_compare(),
     const allocator_type& allocator = allocator_type()
@@ -414,6 +401,34 @@ public:
     this->copy_node(r);
   }
 
+  iterator begin() { return iterator(*this, this->left_most_); }
+  const_iterator begin() const {
+    return const_iterator(*this, this->left_most_);
+  }
+
+  iterator end() { return iterator(*this); }
+  const_iterator end() const {
+    return const_iterator(*this);
+  }
+
+  reverse_iterator rbegin() { return reverse_iterator(this->end()); }
+  const_reverse_iterator rbegin() const {
+    return const_reverse_iterator(this->end());
+  }
+
+  reverse_iterator rend() { return reverse_iterator(this->begin()); }
+  const_reverse_iterator rend() const {
+    return const_reverse_iterator(this->begin());
+  }
+
+  bool      empty()    const { return !this->root_; }
+  size_type size()     const { return this->size_; }
+  size_type max_size() const { return this->allocator_.max_size(); }
+
+  key_compare    key_comp()      const { return this->lesser_; }
+  value_compare  value_comp()    const { return value_compare(this->lesser_); }
+  allocator_type get_allocator() const { return this->allocator_; }
+
   std::pair<iterator, bool> insert(const value_type& value) {
     return this->_insert(value, this->find_parent_child(value.first));
   }
@@ -439,6 +454,61 @@ public:
     this->erase_seq(first, last);
   }
 
+  size_type count(const key_type& key) const {
+    return this->find(key) == this->end() ? 0 : 1;
+  }
+
+  iterator find(const key_type& key) {
+    find_result_type res = this->find_parent_child(key);
+    return iterator(*this, sml::ext::get<1>(res));
+  }
+
+  const_iterator find(const key_type& key) const {
+    const find_result_type res = this->find_parent_child(key);
+    return const_iterator(*this, sml::ext::get<1>(res));
+  }
+
+  iterator lower_bound(const key_type& key) {
+    return iterator(*this, this->lower_bound_node(key));
+  }
+
+  const_iterator lower_bound(const key_type& key) const {
+    return const_iterator(*this, this->lower_bound_node(key));
+  }
+
+  iterator upper_bound(const key_type& key) {
+    return iterator(*this, this->upper_bound_node(key));
+  }
+
+  const_iterator upper_bound(const key_type& key) const {
+    return const_iterator(*this, this->upper_bound_node(key));
+  }
+
+  std::pair<iterator, iterator> equal_range(const key_type& key) {
+    const node_type lower = this->lower_bound_node(key);
+    return std::make_pair(
+      iterator(*this, lower),
+      iterator(*this, lower ? lower->next() : node_type())
+    );
+  }
+
+  std::pair<const_iterator, const_iterator> equal_range(
+    const key_type& key
+  ) const {
+    const node_type lower = this->lower_bound_node(key);
+    return std::make_pair(
+      const_iterator(*this, lower),
+      const_iterator(*this, lower ? lower->next() : node_type())
+    );
+  }
+
+  void clear() {
+    this->root_.reset();
+    this->left_most_.reset();
+    this->right_most_.reset();
+    this->size_ = 0;
+  }
+
   void swap(red_black_tree& r) {
     using std::swap;
 
@@ -450,41 +520,6 @@ public:
     swap(this->lesser_,    r.lesser_);
     swap(this->allocator_, r.allocator_);
   }
-
-  void clear() {
-    this->root_.reset();
-    this->left_most_.reset();
-    this->right_most_.reset();
-    this->size_ = 0;
-  }
-
-  iterator find(const key_type& key) {
-    find_result_type res = this->find_parent_child(key);
-    return iterator(*this, sml::ext::get<1>(res));
-  }
-
-  iterator lower_bound(const key_type& key) {
-    return iterator(*this, this->lower_bound_node(key));
-  }
-
-  iterator upper_bound(const key_type& key) {
-    return iterator(*this, this->upper_bound_node(key));
-  }
-
-  std::pair<iterator, iterator>
-  equal_range(const key_type& key) {
-    node_type lower = this->lower_bound_node(key);
-    return std::make_pair(
-      iterator(*this, lower),
-      iterator(*this, lower ? lower->next() : node_type())
-    );
-  }
-
-  iterator begin() { return iterator(*this, this->left_most_); }
-  iterator end()   { return iterator(*this); }
-
-  reverse_iterator rbegin() { return reverse_iterator(this->end()); }
-  reverse_iterator rend()   { return reverse_iterator(this->begin()); }
 
   red_black_tree& operator=(const red_black_tree& r) {
     if (this != &r) {
@@ -499,55 +534,12 @@ public:
   }
 
   mapped_type& operator[](const key_type& key) {
-    find_result_type res = this->find_parent_child(key);
-    node_type target = sml::ext::get<1>(res);
+    const find_result_type res = this->find_parent_child(key);
+    const node_type target = sml::ext::get<1>(res);
     return target ?
       target->value_.second :
       this->_insert(make_pair(key, mapped_type()), res).first->second;
   }
-
-  bool      empty()    const { return !this->root_; }
-  size_type size()     const { return this->size_; }
-  size_type max_size() const { return this->allocator_.max_size(); }
-
-  const_iterator find(const key_type& key) const {
-    find_result_type res = this->find_parent_child(key);
-    return const_iterator(*this, sml::ext::get<1>(res));
-  }
-
-  const_iterator lower_bound(const key_type& key) const {
-    return const_iterator(*this, this->lower_bound_node(key));
-  }
-
-  const_iterator upper_bound(const key_type& key) const {
-    return const_iterator(*this, this->upper_bound_node(key));
-  }
-
-  std::pair<const_iterator, const_iterator>
-  equal_range(const key_type& key) const {
-    node_type lower = this->lower_bound_node(key);
-    return std::make_pair(
-      const_iterator(*this, lower),
-      const_iterator(*this, lower ? lower->next() : node_type())
-    );
-  }
-
-  size_type count(const key_type& key) const {
-    return this->find(key) == this->end() ? 0 : 1;
-  }
-
-  key_compare    key_comp()      const { return this->lesser_; }
-  value_compare  value_comp()    const { return value_compare(this->lesser_); }
-  allocator_type get_allocator() const { return this->allocator_; }
-
-  const_iterator begin() const { return const_iterator(*this, this->left_most_); }
-  const_iterator end()   const { return const_iterator(*this); }
-
-  const_reverse_iterator
-  rbegin() const { return const_reverse_iterator(this->end()); }
-
-  const_reverse_iterator
-  rend()   const { return const_reverse_iterator(this->begin()); }
 
 private:
   find_result_type find_parent_child(const key_type& target) const {
@@ -556,12 +548,11 @@ private:
 
   find_result_type find_parent_child(const key_type& target, node_type node) const {
     if (!node) {
-      return
-        sml::ext::make_tuple(
-          node_type(),
-          node_type(),
-          static_cast<node_type*>(NULL)
-        );
+      return sml::ext::make_tuple(
+        node_type(),
+        node_type(),
+        static_cast<node_type*>(NULL)
+      );
     }
 
     node_type parent    = node->parent_.lock();
@@ -580,12 +571,11 @@ private:
         node = node->right_;
       }
       else {
-        return
-          sml::ext::make_tuple(
-            node->parent_.lock(),
-            node,
-            static_cast<node_type*>(NULL)
-          );
+        return sml::ext::make_tuple(
+          node->parent_.lock(),
+          node,
+          static_cast<node_type*>(NULL)
+        );
       }
     }
 
@@ -599,8 +589,9 @@ private:
     }
   }
 
-  std::pair<iterator, bool>
-  insert_to_right_most_if_can(const value_type& value) {
+  std::pair<iterator, bool> insert_to_right_most_if_can(
+    const value_type& value
+  ) {
     if (
       !this->empty() &&
       this->lesser_(this->right_most_->value_.first, value.first)
@@ -617,13 +608,12 @@ private:
     }
   }
 
-  std::pair<iterator, bool>
-  _insert(const value_type& value, iterator pos) {
+  std::pair<iterator, bool> _insert(const value_type& value, iterator pos) {
     if (this->empty()) {
       return this->insert(value);
     }
 
-    node_type node = pos.node_;
+    const node_type node = pos.node_;
     if (!node) {
       return this->insert_to_right_most_if_can(value);
     }
@@ -638,7 +628,7 @@ private:
       }
       else {
         iterator prior_pos = pos; --prior_pos;
-        node_type prior = prior_pos.node_;
+        const node_type prior = prior_pos.node_;
         if (this->lesser_(prior->value_.first, value.first)) {
           if (!prior->right_) {
             return this->_insert(value, prior, node_type(), &prior->right_);
@@ -653,12 +643,10 @@ private:
     return this->insert(value);
   }
 
-  std::pair<iterator, bool>
-  _insert(const value_type& value, const find_result_type& res) {
-    node_type  parent = sml::ext::get<0>(res);
-    node_type  target = sml::ext::get<1>(res);
-    node_type* inserted = sml::ext::get<2>(res);
-
+  std::pair<iterator, bool> _insert(
+    const value_type&       value,
+    const find_result_type& res
+  ) {
     return this->_insert(
       value,
       sml::ext::get<0>(res),
@@ -669,9 +657,9 @@ private:
 
   std::pair<iterator, bool> _insert(
     const value_type& value,
-    node_type         parent,
-    node_type         target,
-    node_type*        inserted
+    const node_type   parent,
+    const node_type   target,
+    node_type* const  inserted
   ) {
     if (target) {
       target->value_.second = value.second;
@@ -716,9 +704,9 @@ private:
   }
 
   node_type insert_fixup_left_uncle(node_type node) {
-    node_type parent = node->parent_.lock();
-    node_type right_uncle = parent->right_brother();
+    node_type parent      = node->parent_.lock();
     node_type grandparent = parent->parent_.lock();
+    const node_type right_uncle = parent->right_brother();
 
     if (right_uncle && right_uncle->red()) {
       parent->blacknize();
@@ -744,8 +732,8 @@ private:
 
   node_type insert_fixup_right_uncle(node_type node) {
     node_type parent      = node->parent_.lock();
-    node_type left_uncle  = parent->left_brother();
     node_type grandparent = parent->parent_.lock();
+    const node_type left_uncle = parent->left_brother();
 
     if (left_uncle && left_uncle->red()) {
       parent->blacknize();
@@ -781,7 +769,7 @@ private:
   }
 
   size_type _erase(iterator pos) {
-    node_type z = pos.node_;
+    const node_type z = pos.node_;
     if (!z) return 0;
 
     const node_type y = !z->left_ || !z->right_ ? z : z->next();
@@ -807,8 +795,8 @@ private:
       y->left_   = z->left_;
       y->right_  = z->right_;
       y->red_    = z->red_;
+      y_parent   = y->parent_.lock();
 
-      y_parent = y->parent_.lock();
       if (!y_parent) {
         this->root_ = y;
       }
@@ -841,7 +829,7 @@ private:
     if (x) x->blacknize();
   }
 
-  node_type erase_fixup_left_brother(node_type x) {
+  node_type erase_fixup_left_brother(const node_type x) {
     node_type parent = x->parent_.lock();
     node_type w = parent->right_;
 
@@ -854,10 +842,10 @@ private:
       w = parent->right_;
     }
 
-    node_type left_w  = w->left_;
-    node_type right_w = w->right_;
-    bool wleft_black  = !left_w || !left_w->red();
-    bool wright_black = !right_w || !right_w->red();
+    node_type right_w       = w->right_;
+    const node_type left_w  = w->left_;
+    const bool wleft_black  = !left_w || !left_w->red();
+    const bool wright_black = !right_w || !right_w->red();
 
     if (wleft_black && wright_black) {
       w->rednize();
@@ -880,7 +868,7 @@ private:
     return this->root_;
   }
 
-  node_type erase_fixup_right_brother(node_type x) {
+  node_type erase_fixup_right_brother(const node_type x) {
     node_type parent = x->parent_.lock();
     node_type w = parent->left_;
 
@@ -893,10 +881,10 @@ private:
       w = parent->left_;
     }
 
-    node_type left_w  = w->left_;
-    node_type right_w = w->right_;
-    bool wleft_black  = !left_w || !left_w->red();
-    bool wright_black = !right_w || !right_w->red();
+    node_type left_w        = w->left_;
+    const node_type right_w = w->right_;
+    const bool wleft_black  = !left_w || !left_w->red();
+    const bool wright_black = !right_w || !right_w->red();
 
     if (wleft_black && wright_black) {
       w->rednize();
@@ -920,11 +908,11 @@ private:
   }
 
   node_type lower_bound_node(const key_type& key) const {
-    find_result_type res = find_parent_child(key);
-    node_type target = sml::ext::get<1>(res);
+    const find_result_type res = find_parent_child(key);
+    const node_type target     = sml::ext::get<1>(res);
     if (target) return target;
 
-    node_type parent = sml::ext::get<0>(res);
+    const node_type parent = sml::ext::get<0>(res);
     if (!parent) return node_type();
 
     return this->lesser_(key, parent->value_.first) ?
@@ -932,11 +920,11 @@ private:
   }
 
   node_type upper_bound_node(const key_type& key) const {
-    find_result_type res = find_parent_child(key);
-    node_type target = sml::ext::get<1>(res);
+    const find_result_type res = find_parent_child(key);
+    const node_type target = sml::ext::get<1>(res);
     if (target) return target->next();
 
-    node_type parent = sml::ext::get<0>(res);
+    const node_type parent = sml::ext::get<0>(res);
     if (!parent) return node_type();
 
     return this->lesser_(key, parent->value_.first) ?
