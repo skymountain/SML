@@ -132,7 +132,8 @@ private:
       this->parent_reset(me, parent, right);
     }
 
-    node_type next() const {
+    // non-const method because this method is not logical const
+    node_type next() {
       if (this->right_) {
         return this->right_->left_most_descendant();
       }
@@ -152,7 +153,8 @@ private:
       return node_type();
     }
 
-    node_type prior() const {
+    // non-const method for same reason as next
+    node_type prior() {
       if (this->left_) {
         return this->left_->right_most_descendant();
       }
@@ -297,6 +299,7 @@ private:
       return *this;
     }
 
+    // don't return const values to conform with standard iterators such as GCC
     node_iterator operator++(int) {
       node_iterator ret = *this;
       this->operator++();
@@ -308,6 +311,7 @@ private:
       return *this;
     }
 
+    // don't return const values for same reason as operator ++
     node_iterator operator--(int) {
       node_iterator ret = *this;
       this->operator--();
