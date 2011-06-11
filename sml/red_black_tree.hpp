@@ -36,7 +36,7 @@ public:
   typedef typename Allocator::const_pointer   const_pointer;
 
   typedef std::size_t    size_type;
-  typedef std::ptrdiff_t difference_typ;
+  typedef std::ptrdiff_t difference_type;
 
   typedef node_iterator<value_type>             iterator;
   typedef node_iterator<const value_type>       const_iterator;
@@ -265,11 +265,14 @@ private:
     }
   };
 
+  // NOTE that value_type is V in node_iterator
   template<class V>
   class node_iterator :
     public std::iterator<std::bidirectional_iterator_tag, V> {
 
   public:
+    typedef V value_type;
+
     node_iterator() :
       right_most_(),
       node_() {

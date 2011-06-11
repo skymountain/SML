@@ -1,8 +1,11 @@
+#include <functional>
 #include <iterator>
 #include <list>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+#include <cstddef>
 #include <gtest/gtest.h>
 #include "sml/red_black_tree.hpp"
 
@@ -14,6 +17,8 @@ using std::string;
 using std::advance;
 using std::list;
 using std::vector;
+
+using testing::StaticAssertTypeEq;
 
 typedef sml::red_black_tree<string, int> map_type;
 typedef map_type::iterator               iterator;
@@ -622,6 +627,60 @@ TEST_F(RedBlackTreeFixture, Clear) {
   m.clear();
 
   status_test(m, value_list_type());
+}
+
+TEST(RedBlackTreeType, TypesInMap) {
+  typedef std::allocator< pair<const std::string, int> > allocator_type;
+
+  StaticAssertTypeEq<std::string,               map_type::key_type>();
+  StaticAssertTypeEq<int,                       map_type::mapped_type>();
+  StaticAssertTypeEq<std::less<std::string>,    map_type::key_compare>();
+  StaticAssertTypeEq<map_type::value_compare,   map_type::value_compare>();
+  StaticAssertTypeEq<allocator_type,            map_type::allocator_type>();
+  StaticAssertTypeEq<allocator_type::reference, map_type::reference>();
+  StaticAssertTypeEq<allocator_type::pointer,   map_type::pointer>();
+  StaticAssertTypeEq<map_type::iterator,        map_type::iterator>();
+  StaticAssertTypeEq<map_type::const_iterator,  map_type::const_iterator>();
+  StaticAssertTypeEq<map_type::size_type,       map_type::size_type>();
+  StaticAssertTypeEq<map_type::difference_type, map_type::difference_type>();
+
+  StaticAssertTypeEq<
+    std::pair<const std::string, int>, map_type::value_type
+  >();
+  StaticAssertTypeEq<
+    allocator_type::const_pointer, map_type::const_pointer
+  >();
+  StaticAssertTypeEq<
+    allocator_type::const_reference, map_type::const_reference
+  >();
+  StaticAssertTypeEq<
+    std::reverse_iterator<map_type::iterator>, map_type::reverse_iterator
+  >();
+
+  StaticAssertTypeEq<
+    std::reverse_iterator<map_type::const_iterator>,
+    map_type::const_reverse_iterator
+  >();
+}
+
+TEST(RedBlackTreeType, TypesInIterator) {
+  StaticAssertTypeEq<map_type::value_type,  iterator::value_type>();
+  StaticAssertTypeEq<map_type::value_type*, iterator::pointer>();
+  StaticAssertTypeEq<map_type::value_type&, iterator::reference>();
+  StaticAssertTypeEq<std::ptrdiff_t,        iterator::difference_type>();
+  StaticAssertTypeEq<
+    std::bidirectional_iterator_tag, iterator::iterator_category
+  >();
+
+  StaticAssertTypeEq<const map_type::value_type,  const_iterator::value_type>();
+  StaticAssertTypeEq<const map_type::value_type*, const_iterator::pointer>();
+  StaticAssertTypeEq<const map_type::value_type&, const_iterator::reference>();
+  StaticAssertTypeEq<
+    std::ptrdiff_t, const_iterator::difference_type
+  >();
+  StaticAssertTypeEq<
+    std::bidirectional_iterator_tag, iterator::iterator_category
+  >();
 }
 
 } // namespace
