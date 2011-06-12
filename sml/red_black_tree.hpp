@@ -550,7 +550,13 @@ public:
     lesser_(r.lesser_),
     allocator_(r.allocator_) {
 
-    this->copy_node(r);
+    this->root_ =
+      node::clone_node(this->allocator_, r.root_, this->root_, this->lesser_);
+
+    if (this->root_) {
+      this->left_most_  = this->root_->left_most_descendant();
+      this->right_most_ = this->root_->right_most_descendant();
+    }
   }
 
   iterator begin() { return iterator(*this, this->left_most_); }
@@ -776,11 +782,8 @@ private:
   }
 
   std::pair<iterator, bool> _insert(const value_type& value, iterator pos) {
-    if (this->empty()) {
-      return this->insert(value);
-    }
-
     const node_type node = pos.node_;
+
     if (!node) {
       return this->insert_to_right_most_if_can(value);
     }
@@ -840,7 +843,7 @@ private:
         node::create_root(this->allocator_, value, this->root_);
     }
     else {
-      iter_node = *inserted =
+      iter_node =
         node::create_node(this->allocator_, parent, value, this->root_);
 
       if (this->lesser_(value.first, this->left_most_->key())) {
@@ -850,6 +853,7 @@ private:
         this->right_most_ = iter_node;
       }
 
+      *inserted = iter_node;
       this->insert_fixup(iter_node);
     }
 
@@ -1072,16 +1076,6 @@ private:
     parent->right_rotate();
 
     return this->root_;
-  }
-
-  void copy_node(const red_black_tree& r) {
-    this->root_ =
-      node::clone_node(this->allocator_, r.root_, this->root_, this->lesser_);
-
-    if (this->root_) {
-      this->left_most_  = this->root_->left_most_descendant();
-      this->right_most_ = this->root_->right_most_descendant();
-    }
   }
 
   node_type      root_;
