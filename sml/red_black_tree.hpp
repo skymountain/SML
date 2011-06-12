@@ -692,13 +692,10 @@ public:
 
   red_black_tree& operator=(const red_black_tree& r) {
     if (this != &r) {
-      this->clear();
-
-      this->lesser_ = r.lesser_;
-      this->size_   = r.size_;
-      this->copy_node(r);
+      red_black_tree tmp(r);
+      tmp.allocator_ = this->allocator_;
+      this->swap(tmp);
     }
-
     return *this;
   }
 
