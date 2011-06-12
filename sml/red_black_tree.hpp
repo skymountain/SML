@@ -138,6 +138,7 @@ private:
 
     bool is_root() const { return this->parnet_; }
     bool red()     const { return this->red_; }
+    bool black()   const { return !this->red(); }
 
     node_type right_brother() { return this->parent_.lock()->right_; }
     node_type left_brother()  { return this->parent_.lock()->left_;  }
@@ -941,7 +942,7 @@ private:
       y_parent->right_ = x;
     }
 
-    const bool y_red = y->red();
+    const bool y_black = y->black();
 
     if (y != z) {
       y->parent_ = z->parent_;
@@ -964,7 +965,7 @@ private:
       if (y->right_) y->right_->parent_ = y;
     }
 
-    if (!y_red) this->erase_fixup(x);
+    if (y_black) this->erase_fixup(x);
 
     if (this->left_most_  == z) this->left_most_  = z->next();
     if (this->right_most_ == z) this->right_most_ = z->prior();
@@ -974,7 +975,7 @@ private:
   }
 
   void erase_fixup(node_type x) {
-    while (x && !x->parent_.expired() && !x->red()) {
+    while (x && !x->parent_.expired() && x->black()) {
       x = x == x->left_brother() ?
         this->erase_fixup_left_brother(x) :
         this->erase_fixup_right_brother(x);
@@ -997,8 +998,8 @@ private:
 
     node_type right_w       = w->right_;
     const node_type left_w  = w->left_;
-    const bool wleft_black  = !left_w || !left_w->red();
-    const bool wright_black = !right_w || !right_w->red();
+    const bool wleft_black  = !left_w  || left_w->black();
+    const bool wright_black = !right_w || right_w->black();
 
     if (wleft_black && wright_black) {
       w->rednize();
@@ -1036,8 +1037,8 @@ private:
 
     node_type left_w        = w->left_;
     const node_type right_w = w->right_;
-    const bool wleft_black  = !left_w || !left_w->red();
-    const bool wright_black = !right_w || !right_w->red();
+    const bool wleft_black  = !left_w  || left_w->black();
+    const bool wright_black = !right_w || right_w->black();
 
     if (wleft_black && wright_black) {
       w->rednize();
