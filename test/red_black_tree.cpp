@@ -36,43 +36,124 @@ typedef vector< pair<string, int> > value_list_type;
 class RedBlackTreeFixture : public testing::Test {
 protected:
   void SetUp() {
-    this->map1.insert(make_pair("efg", 123));
-    this->map1.insert(make_pair("abc", 456));
-    this->map1.insert(make_pair("hij", 789));
-    this->map1.insert(make_pair("klm", 100));
+    {
+      this->map1.insert(make_pair("efg", 123));
+      this->map1.insert(make_pair("abc", 456));
+      this->map1.insert(make_pair("hij", 789));
+      this->map1.insert(make_pair("klm", 100));
 
-    this->values1.push_back(make_pair("abc", 456));
-    this->values1.push_back(make_pair("efg", 123));
-    this->values1.push_back(make_pair("hij", 789));
-    this->values1.push_back(make_pair("klm", 100));
+      this->values1.push_back(make_pair("abc", 456));
+      this->values1.push_back(make_pair("efg", 123));
+      this->values1.push_back(make_pair("hij", 789));
+      this->values1.push_back(make_pair("klm", 100));
 
-    this->map2.insert(make_pair("saf", 831));
-    this->map2.insert(make_pair("ljz", 193));
-    this->map2.insert(make_pair("zdf", 371));
-    this->map2.insert(make_pair("bam", 418));
-    this->map2.insert(make_pair("fkd", 710));
-    this->map2.insert(make_pair("pzj", 318));
+      this->unordered_vs1.push_back(make_pair("hij", 789));
+      this->unordered_vs1.push_back(make_pair("efg", 123));
+      this->unordered_vs1.push_back(make_pair("klm", 100));
+      this->unordered_vs1.push_back(make_pair("abc", 456));
+    }
 
-    this->values2.push_back(make_pair("bam", 418));
-    this->values2.push_back(make_pair("fkd", 710));
-    this->values2.push_back(make_pair("ljz", 193));
-    this->values2.push_back(make_pair("pzj", 318));
-    this->values2.push_back(make_pair("saf", 831));
-    this->values2.push_back(make_pair("zdf", 371));
+    {
+      this->map2.insert(make_pair("saf", 831));
+      this->map2.insert(make_pair("ljz", 193));
+      this->map2.insert(make_pair("zdf", 371));
+      this->map2.insert(make_pair("bam", 418));
+      this->map2.insert(make_pair("fkd", 710));
+      this->map2.insert(make_pair("pzj", 318));
+      this->map2.insert(make_pair("fos", 881));
+      this->map2.insert(make_pair("asi", 120));
+      this->map2.insert(make_pair("mpe", 491));
+      this->map2.insert(make_pair("qje", 984));
+      this->map2.insert(make_pair("rux", 732));
+      this->map2.insert(make_pair("jru", 843));
+      this->map2.insert(make_pair("yhy", 239));
+      this->map2.insert(make_pair("gdx", 374));
+      this->map2.insert(make_pair("oeb", 498));
+      this->map2.insert(make_pair("bqz", 843));
+      this->map2.insert(make_pair("lon", 581));
+      this->map2.insert(make_pair("vls", 985));
+      this->map2.insert(make_pair("jfq", 329));
+      this->map2.insert(make_pair("nvl", 838));
+      this->map2.insert(make_pair("xdm", 314));
+      this->map2.insert(make_pair("kpr", 983));
+      this->map2.insert(make_pair("sin", 431));
+      this->map2.insert(make_pair("hli", 329));
+      this->map2.insert(make_pair("cdf", 838));
+      this->map2.insert(make_pair("ddk", 314));
+      this->map2.insert(make_pair("usy", 983));
+      this->map2.insert(make_pair("tkd", 431));
+      this->map2.insert(make_pair("fhd", 200));
+      this->map2.insert(make_pair("xis", 831));
+      this->map2.insert(make_pair("iwl", 708));
+      this->map2.insert(make_pair("ofz", 122));
+      this->map2.insert(make_pair("dqk", 382));
+      this->map2.insert(make_pair("wer", 841));
+      this->map2.insert(make_pair("ljo", 930));
+      this->map2.insert(make_pair("nvd", 901));
+      this->map2.insert(make_pair("aaa", 111));
+      this->map2.insert(make_pair("aab", 112));
+      this->map2.insert(make_pair("aac", 113));
+      this->map2.insert(make_pair("aad", 114));
+      this->map2.insert(make_pair("aae", 115));
+      this->map2.insert(make_pair("aaf", 116));
+      this->map2.insert(make_pair("aag", 117));
+      this->map2.insert(make_pair("aah", 118));
+      this->map2.insert(make_pair("aai", 119));
 
-    this->unordered_vs1.push_back(make_pair("hij", 789));
-    this->unordered_vs1.push_back(make_pair("efg", 123));
-    this->unordered_vs1.push_back(make_pair("klm", 100));
-    this->unordered_vs1.push_back(make_pair("abc", 456));
+      this->values2.push_back(make_pair("aaa", 111));
+      this->values2.push_back(make_pair("aab", 112));
+      this->values2.push_back(make_pair("aac", 113));
+      this->values2.push_back(make_pair("aad", 114));
+      this->values2.push_back(make_pair("aae", 115));
+      this->values2.push_back(make_pair("aaf", 116));
+      this->values2.push_back(make_pair("aag", 117));
+      this->values2.push_back(make_pair("aah", 118));
+      this->values2.push_back(make_pair("aai", 119));
+      this->values2.push_back(make_pair("asi", 120));
+      this->values2.push_back(make_pair("bam", 418));
+      this->values2.push_back(make_pair("bqz", 843));
+      this->values2.push_back(make_pair("cdf", 838));
+      this->values2.push_back(make_pair("ddk", 314));
+      this->values2.push_back(make_pair("dqk", 382));
+      this->values2.push_back(make_pair("fhd", 200));
+      this->values2.push_back(make_pair("fkd", 710));
+      this->values2.push_back(make_pair("fos", 881));
+      this->values2.push_back(make_pair("gdx", 374));
+      this->values2.push_back(make_pair("hli", 329));
+      this->values2.push_back(make_pair("iwl", 708));
+      this->values2.push_back(make_pair("jfq", 329));
+      this->values2.push_back(make_pair("jru", 843));
+      this->values2.push_back(make_pair("kpr", 983));
+      this->values2.push_back(make_pair("ljo", 930));
+      this->values2.push_back(make_pair("ljz", 193));
+      this->values2.push_back(make_pair("lon", 581));
+      this->values2.push_back(make_pair("mpe", 491));
+      this->values2.push_back(make_pair("nvd", 901));
+      this->values2.push_back(make_pair("nvl", 838));
+      this->values2.push_back(make_pair("oeb", 498));
+      this->values2.push_back(make_pair("ofz", 122));
+      this->values2.push_back(make_pair("pzj", 318));
+      this->values2.push_back(make_pair("qje", 984));
+      this->values2.push_back(make_pair("rux", 732));
+      this->values2.push_back(make_pair("saf", 831));
+      this->values2.push_back(make_pair("sin", 431));
+      this->values2.push_back(make_pair("tkd", 431));
+      this->values2.push_back(make_pair("usy", 983));
+      this->values2.push_back(make_pair("vls", 985));
+      this->values2.push_back(make_pair("wer", 841));
+      this->values2.push_back(make_pair("xdm", 314));
+      this->values2.push_back(make_pair("xis", 831));
+      this->values2.push_back(make_pair("yhy", 239));
+      this->values2.push_back(make_pair("zdf", 371));
+    }
   }
 
   map_type map1;
   value_list_type values1;
+  value_list_type unordered_vs1;
 
   map_type map2;
   value_list_type values2;
-
-  value_list_type unordered_vs1;
 };
 
 void key_compare_test(const map_type& m) {
@@ -109,7 +190,7 @@ void status_test(map_type& m, const value_list_type& vs) {
     const_iterator cpos  = cm.begin(); advance(cpos, it - vs.begin());
     const_iterator cnext = cpos; ++cnext;
 
-    ASSERT_EQ(1,     cm.count(key)) << key;
+    ASSERT_EQ(1,     cm.count(key));
     ASSERT_EQ(value, m[key]);
 
     ASSERT_EQ(pos,   m.find(key));
@@ -126,6 +207,52 @@ void status_test(map_type& m, const value_list_type& vs) {
     pair<const_iterator, const_iterator> ceq_range = cm.equal_range(key);
     ASSERT_EQ(cpos,  ceq_range.first);
     ASSERT_EQ(cnext, ceq_range.second);
+  }
+
+  {
+    iterator l1 = m.lower_bound("");
+    ASSERT_EQ(m.begin(), l1);
+
+    iterator l2 = m.lower_bound("zzzz");
+    ASSERT_EQ(m.end(), l2);
+
+    const_iterator cl1 = cm.lower_bound("");
+    ASSERT_EQ(cm.begin(), cl1);
+
+    const_iterator cl2 = cm.lower_bound("zzzz");
+    ASSERT_EQ(cm.end(), cl2);
+  }
+
+  {
+    iterator u1 = m.upper_bound("");
+    ASSERT_EQ(m.begin(), u1);
+
+    iterator u2 = m.upper_bound("zzzz");
+    ASSERT_EQ(m.end(), u2);
+
+    const_iterator cu1 = cm.upper_bound("");
+    ASSERT_EQ(cm.begin(), cu1);
+
+    const_iterator cu2 = cm.upper_bound("zzzz");
+    ASSERT_EQ(cm.end(), cu2);
+  }
+
+  {
+    pair<iterator, iterator> e1 = m.equal_range("");
+    ASSERT_EQ(m.begin(), e1.first);
+    ASSERT_EQ(m.begin(), e1.second);
+
+    pair<iterator, iterator> e2 = m.equal_range("zzzz");
+    ASSERT_EQ(m.end(), e2.first);
+    ASSERT_EQ(m.end(), e2.second);
+
+    pair<const_iterator, const_iterator> ce1 = cm.equal_range("");
+    ASSERT_EQ(cm.begin(), ce1.first);
+    ASSERT_EQ(cm.begin(), ce1.second);
+
+    pair<const_iterator, const_iterator> ce2 = cm.equal_range("zzzz");
+    ASSERT_EQ(cm.end(), ce2.first);
+    ASSERT_EQ(cm.end(), ce2.second);
   }
 
   iterator b = m.begin();
@@ -287,6 +414,7 @@ TEST(RedBlackTree, InsertLargestElement) {
 
 TEST_F(RedBlackTreeFixture, InsertElements) {
   status_test(this->map1, this->values1);
+  status_test(this->map2, this->values2);
 }
 
 TEST_F(RedBlackTreeFixture, InsertOrderedElementSequenceToEmpty) {
@@ -515,17 +643,17 @@ TEST(RedBlackTree, EraseFromEmpty) {
 
 TEST_F(RedBlackTreeFixture, Erase1) {
   for (
-    value_list_type::iterator it = this->values1.begin();
-    it != this->values1.end();
+    value_list_type::iterator it = this->values2.begin();
+    it != this->values2.end();
     ++it
   ) {
     SCOPED_TRACE("By " + it->first);
 
-    map_type m = this->map1;
+    map_type m = this->map2;
     m.erase(m.find(it->first));
 
-    value_list_type vs = this->values1;
-    vs.erase(vs.begin() + (it - this->values1.begin()));
+    value_list_type vs = this->values2;
+    vs.erase(vs.begin() + (it - this->values2.begin()));
 
     status_test(m, vs);
   }
@@ -533,33 +661,33 @@ TEST_F(RedBlackTreeFixture, Erase1) {
 
 TEST_F(RedBlackTreeFixture, Erase2) {
   for (
-       value_list_type::iterator it = this->values1.begin();
-       it != this->values1.end();
+       value_list_type::iterator it = this->values2.begin();
+       it != this->values2.end();
        ++it
   ) {
     SCOPED_TRACE("By " + it->first);
 
-    map_type m = this->map1;
+    map_type m = this->map2;
     size_t res = m.erase(it->first);
     ASSERT_EQ(1, res);
 
-    value_list_type vs = this->values1;
-    vs.erase(vs.begin() + (it - this->values1.begin()));
+    value_list_type vs = this->values2;
+    vs.erase(vs.begin() + (it - this->values2.begin()));
 
     status_test(m, vs);
   }
 }
 
 TEST_F(RedBlackTreeFixture, Erase3) {
-  for (size_type i = 0; i <= this->values1.size(); ++i) {
-    for (size_type j = i; j <= this->values1.size(); ++j) {
-      map_type m = this->map1;
+  for (size_type i = 0; i <= this->values2.size(); ++i) {
+    for (size_type j = i; j <= this->values2.size(); ++j) {
+      map_type m = this->map2;
       iterator b = m.begin(), e = m.begin();
       advance(b, i); advance(e, j);
 
       m.erase(b, e);
 
-      value_list_type vs = this->values1;
+      value_list_type vs = this->values2;
       vs.erase(vs.begin()+i, vs.begin()+j);
 
       status_test(m, vs);
