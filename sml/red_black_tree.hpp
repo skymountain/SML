@@ -233,7 +233,14 @@ private:
       node_type&           root
     ) {
       node_ptr np = allocator.allocate(1);
-      allocator.construct(np, node(true, parent, value, root));
+      try {
+        allocator.construct(np, node(true, parent, value, root));
+      }
+      catch (...) {
+        allocator.deallocate(np, 1);
+        throw;
+      }
+
       return node_type(np, node_deleter(allocator));
     }
 
@@ -246,7 +253,16 @@ private:
       if (!src) return node_type();
 
       node_ptr np = allocator.allocate(1);
-      allocator.construct(np, node(src->red_, node_type(), src->value(), root));
+      try {
+        allocator.construct(
+          np,
+          node(src->red_, node_type(), src->value(), root)
+        );
+      }
+      catch (...) {
+        allocator.deallocate(np, 1);
+        throw;
+      }
 
       node_type dst   = node_type(np, node_deleter(allocator));
       node_type left  = clone_node(allocator, src->left_,  root, lesser);
