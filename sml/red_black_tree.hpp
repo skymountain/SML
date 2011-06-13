@@ -550,13 +550,7 @@ public:
     lesser_(r.lesser_),
     allocator_(r.allocator_) {
 
-    this->root_ =
-      node::clone_node(this->allocator_, r.root_, this->root_, this->lesser_);
-
-    if (this->root_) {
-      this->left_most_  = this->root_->left_most_descendant();
-      this->right_most_ = this->root_->right_most_descendant();
-    }
+    this->copy_node(r.root_);
   }
 
   iterator begin() { return iterator(*this, this->left_most_); }
@@ -698,8 +692,7 @@ public:
 
   red_black_tree& operator=(const red_black_tree& r) {
     if (this != &r) {
-      red_black_tree tmp(r);
-      tmp.allocator_ = this->allocator_;
+      red_black_tree tmp(r, this->allocator_);
       this->swap(tmp);
     }
     return *this;
@@ -714,6 +707,18 @@ public:
   }
 
 private:
+  // for operator =
+  red_black_tree(const red_black_tree& r, const allocator_type& allocator) :
+    root_(),
+    left_most_(),
+    right_most_(),
+    size_(r.size_),
+    lesser_(r.lesser_),
+    allocator_(allocator) {
+
+    this->copy_node(r.root_);
+  }
+
   node_type root() { return this->root_; }
   const_node_type root() const { return this->root_; }
 
@@ -1076,6 +1081,16 @@ private:
     parent->right_rotate();
 
     return this->root_;
+  }
+
+  void copy_node(node_type root) {
+    this->root_ =
+      node::clone_node(this->allocator_, root, this->root_, this->lesser_);
+
+    if (this->root_) {
+      this->left_most_  = this->root_->left_most_descendant();
+      this->right_most_ = this->root_->right_most_descendant();
+    }
   }
 
   node_type      root_;
