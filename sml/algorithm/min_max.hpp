@@ -8,8 +8,11 @@
 namespace sml { namespace algorithm {
 
 template<class Iterator, class Lesser>
-std::pair<Iterator, Iterator>
-min_max(const Iterator begin, const Iterator end, Lesser lesser) {
+std::pair<Iterator, Iterator> min_max(
+  const Iterator begin,
+  const Iterator end,
+  Lesser lesser
+) {
   using std::swap;
   typedef
     typename std::iterator_traits<Iterator>::difference_type
@@ -43,8 +46,10 @@ min_max(const Iterator begin, const Iterator end, Lesser lesser) {
 }
 
 template<class Iterator>
-std::pair<Iterator, Iterator>
-min_max(const Iterator begin, const Iterator end) {
+std::pair<Iterator, Iterator> min_max(
+  const Iterator begin,
+  const Iterator end
+) {
   return sml::algorithm::min_max(begin, end, sml::op::lesser());
 }
 

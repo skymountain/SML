@@ -7,8 +7,7 @@
 namespace sml { namespace sorting {
 
 template<class Iterator, class Lesser>
-Iterator
-heap_sort(const Iterator begin, const Iterator end, Lesser lesser) {
+Iterator heap_sort(const Iterator begin, const Iterator end, Lesser lesser) {
   using std::swap;
   typedef
     typename std::iterator_traits<Iterator>::difference_type

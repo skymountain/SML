@@ -8,8 +8,7 @@
 namespace sml { namespace algorithm {
 
 template<class Iterator, class T, class Comparator>
-std::pair<Iterator, Iterator>
-binary_search_min_max(
+std::pair<Iterator, Iterator> binary_search_min_max(
   const Iterator begin,
   const Iterator end,
   const T&       v,
@@ -57,8 +56,11 @@ binary_search_min_max(
 }
 
 template<class Iterator, class T>
-std::pair<Iterator, Iterator>
-binary_search_min_max(const Iterator begin, const Iterator end, const T& v) {
+std::pair<Iterator, Iterator> binary_search_min_max(
+  const Iterator begin,
+  const Iterator end,
+  const T&       v
+) {
   return
     sml::algorithm::binary_search_min_max(begin, end, v, sml::op::comparator());
 }

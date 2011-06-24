@@ -8,8 +8,7 @@
 namespace sml { namespace algorithm {
 
 template<class Iterator, class T, class Comparator>
-Iterator
-binary_search(
+Iterator binary_search(
   const Iterator begin,
   const Iterator end,
   const T&       v,

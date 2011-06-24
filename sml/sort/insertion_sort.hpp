@@ -10,8 +10,11 @@
 namespace sml { namespace sorting {
 
 template<class Iterator, class Lesser>
-Iterator
-insertion_sort(const Iterator begin, const Iterator end, Lesser lesser) {
+Iterator insertion_sort(
+  const Iterator begin,
+  const Iterator end,
+  Lesser lesser
+) {
   using sml::iterator::next;
   using sml::iterator::prior;
 

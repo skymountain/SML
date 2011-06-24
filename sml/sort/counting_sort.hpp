@@ -9,9 +9,13 @@
 
 namespace sml { namespace sorting {
 
-template<class CountType, class InputIterator, class RandomAccessIterator, class Encoder>
-RandomAccessIterator
-counting_sort(
+template<
+  class CountType,
+  class InputIterator,
+  class RandomAccessIterator,
+  class Encoder
+>
+RandomAccessIterator counting_sort(
   const InputIterator  begin,
   const InputIterator  end,
   const RandomAccessIterator result,
@@ -57,8 +61,7 @@ counting_sort(
 }
 
 template<class InputIterator, class RandomAccessIterator, class Encoder>
-RandomAccessIterator
-counting_sort(
+RandomAccessIterator counting_sort(
   const InputIterator  begin,
   const InputIterator  end,
   const RandomAccessIterator result,
