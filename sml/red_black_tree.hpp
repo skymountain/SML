@@ -802,8 +802,7 @@ private:
         );
       }
       else {
-        iterator prior_pos = pos; --prior_pos;
-        const node_type prior = prior_pos.node_;
+        const node_type prior = node->prior();
         if (this->lesser_(prior->key(), value.first)) {
           if (!prior->right_) {
             return this->_insert(value, prior, node_type(), &prior->right_);
