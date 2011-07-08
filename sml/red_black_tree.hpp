@@ -1,6 +1,7 @@
 #ifndef _SML_RED_BLACK_TREE_HPP
 #define _SML_RED_BLACK_TREE_HPP
 
+#include <algorithm>
 #include <functional>
 #include <iterator>
 #include <memory>
@@ -704,6 +705,35 @@ public:
     return target ?
       target->mapped() :
       this->_insert(make_pair(key, mapped_type()), res).first->second;
+  }
+
+  bool operator==(const red_black_tree& r) const {
+    return
+      this->size() == r.size() &&
+      std::equal(this->begin(), this->end(), r.begin());
+  }
+
+  bool operator!=(const red_black_tree& r) const {
+    return !(*this == r);
+  }
+
+  bool operator<(const red_black_tree& r) const {
+    return std::lexicographical_compare(
+      this->begin(), this->end(),
+      r.begin(),     r.end()
+    );
+  }
+
+  bool operator>(const red_black_tree& r) const {
+    return r < *this;
+  }
+
+  bool operator<=(const red_black_tree& r) const {
+    return !(*this > r);
+  }
+
+  bool operator>=(const red_black_tree& r) const {
+    return !(r > *this);
   }
 
 private:

@@ -156,6 +156,32 @@ protected:
   value_list_type values2;
 };
 
+class RedBlackTreeCompare : public testing::Test {
+protected:
+  void SetUp() {
+    this->map.insert(make_pair("efg", 123));
+    this->map.insert(make_pair("tfs", 498));
+    this->map.insert(make_pair("abc", 456));
+
+    this->equal.insert(make_pair("tfs", 498));
+    this->equal.insert(make_pair("abc", 456));
+    this->equal.insert(make_pair("efg", 123));
+
+    this->lesser.insert(make_pair("sfs", 498));
+    this->lesser.insert(make_pair("abc", 456));
+    this->lesser.insert(make_pair("efg", 123));
+
+    this->greater.insert(make_pair("tfs", 498));
+    this->greater.insert(make_pair("abc", 456));
+    this->greater.insert(make_pair("efg", 223));
+  }
+
+  map_type map;
+  map_type equal;
+  map_type lesser;
+  map_type greater;
+};
+
 void key_compare_test(const map_type& m) {
   key_compare kcmp = m.key_comp();
   ASSERT_TRUE ( kcmp("abc", "efg") );
@@ -828,6 +854,108 @@ TEST_F(RedBlackTreeFixture, Clear) {
   this->map1.clear();
 
   status_test(this->map1, value_list_type());
+}
+
+TEST_F(RedBlackTreeCompare, Equal) {
+  ASSERT_TRUE(map_type()     == map_type());
+  ASSERT_TRUE(this->map      == this->map);
+
+  ASSERT_FALSE(map_type()    == this->map);
+  ASSERT_FALSE(this->map     == map_type());
+
+  ASSERT_TRUE(this->map      == this->equal);
+  ASSERT_TRUE(this->equal    == this->map);
+
+  ASSERT_FALSE(this->map     == this->lesser);
+  ASSERT_FALSE(this->lesser  == this->map);
+
+  ASSERT_FALSE(this->map     == this->greater);
+  ASSERT_FALSE(this->greater == this->map);
+}
+
+TEST_F(RedBlackTreeCompare, NotEqual) {
+  ASSERT_FALSE(map_type()   != map_type());
+  ASSERT_FALSE(this->map    != this->map);
+
+  ASSERT_TRUE(map_type()    != this->map);
+  ASSERT_TRUE(this->map     != map_type());
+
+  ASSERT_FALSE(this->map    != this->equal);
+  ASSERT_FALSE(this->equal  != this->map);
+
+  ASSERT_TRUE(this->map     != this->lesser);
+  ASSERT_TRUE(this->lesser  != this->map);
+
+  ASSERT_TRUE(this->map     != this->greater);
+  ASSERT_TRUE(this->greater != this->map);
+}
+
+TEST_F(RedBlackTreeCompare, Lesser) {
+  ASSERT_FALSE(map_type()    < map_type());
+  ASSERT_FALSE(this->map     < this->map);
+
+  ASSERT_TRUE(map_type()     < this->map);
+  ASSERT_FALSE(this->map     < map_type());
+
+  ASSERT_FALSE(this->map     < this->equal);
+  ASSERT_FALSE(this->equal   < this->map);
+
+  ASSERT_FALSE(this->map     < this->lesser);
+  ASSERT_TRUE(this->lesser   < this->map);
+
+  ASSERT_TRUE(this->map      < this->greater);
+  ASSERT_FALSE(this->greater < this->map);
+}
+
+TEST_F(RedBlackTreeCompare, LesserOrEqual) {
+  ASSERT_TRUE(map_type()     <= map_type());
+  ASSERT_TRUE(this->map      <= this->map);
+
+  ASSERT_TRUE(map_type()     <= this->map);
+  ASSERT_FALSE(this->map     <= map_type());
+
+  ASSERT_TRUE(this->map      <= this->equal);
+  ASSERT_TRUE(this->equal    <= this->map);
+
+  ASSERT_FALSE(this->map     <= this->lesser);
+  ASSERT_TRUE(this->lesser   <= this->map);
+
+  ASSERT_TRUE(this->map      <= this->greater);
+  ASSERT_FALSE(this->greater <= this->map);
+}
+
+TEST_F(RedBlackTreeCompare, Greater) {
+  ASSERT_FALSE(map_type()   > map_type());
+  ASSERT_FALSE(this->map    > this->map);
+
+  ASSERT_FALSE(map_type()   > this->map);
+  ASSERT_TRUE(this->map     > map_type());
+
+  ASSERT_FALSE(this->map    > this->equal);
+  ASSERT_FALSE(this->equal  > this->map);
+
+  ASSERT_TRUE(this->map     > this->lesser);
+  ASSERT_FALSE(this->lesser > this->map);
+
+  ASSERT_FALSE(this->map    > this->greater);
+  ASSERT_TRUE(this->greater > this->map);
+}
+
+TEST_F(RedBlackTreeCompare, GreaterOrEqual) {
+  ASSERT_TRUE(map_type()    >= map_type());
+  ASSERT_TRUE(this->map     >= this->map);
+
+  ASSERT_FALSE(map_type()   >= this->map);
+  ASSERT_TRUE(this->map     >= map_type());
+
+  ASSERT_TRUE(this->map     >= this->equal);
+  ASSERT_TRUE(this->equal   >= this->map);
+
+  ASSERT_TRUE(this->map     >= this->lesser);
+  ASSERT_FALSE(this->lesser >= this->map);
+
+  ASSERT_FALSE(this->map    >= this->greater);
+  ASSERT_TRUE(this->greater >= this->map);
 }
 
 TEST(RedBlackTreeType, TypesInMap) {
