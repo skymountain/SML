@@ -603,7 +603,7 @@ public:
   }
 
   iterator insert(iterator pos, const value_type& value) {
-    return this->_insert(value, pos).first;
+    return this->_insert_by_pos(value, pos).first;
   }
 
   template<class InputIterator>
@@ -832,7 +832,7 @@ private:
     }
   }
 
-  std::pair<iterator, bool> _insert(const value_type& value, iterator pos) {
+  std::pair<iterator, bool> _insert_by_pos(const value_type& value, iterator pos) {
     const node_type node = pos.node_;
 
     if (!node) {
