@@ -564,6 +564,14 @@ public:
     return const_iterator(*this);
   }
 
+  const_iterator cbegin() const {
+    return this->begin();
+  }
+
+  const_iterator cend() const {
+    return this->end();
+  }
+
   reverse_iterator rbegin() { return reverse_iterator(this->end()); }
   const_reverse_iterator rbegin() const {
     return const_reverse_iterator(this->end());
@@ -572,6 +580,14 @@ public:
   reverse_iterator rend() { return reverse_iterator(this->begin()); }
   const_reverse_iterator rend() const {
     return const_reverse_iterator(this->begin());
+  }
+
+  const_reverse_iterator crbegin() const {
+    return this->rbegin();
+  }
+
+  const_reverse_iterator crend() const {
+    return this->rend();
   }
 
   bool      empty()    const { return !this->root_; }

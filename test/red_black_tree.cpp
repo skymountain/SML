@@ -201,6 +201,56 @@ void allocator_test(const map_type& m) {
   ASSERT_EQ(map_type().get_allocator(), m.get_allocator());
 }
 
+void const_iterator_test(
+  map_type& m,
+  const value_list_type& vs,
+  const_iterator cb
+) {
+  const map_type& cm = static_cast<const map_type&>(m);
+
+  for (
+       value_list_type::const_iterator it = vs.begin();
+       it != vs.end();
+       ++it, ++cb
+  ) {
+    ASSERT_NE(cm.end(),   cb);
+    ASSERT_NE(cm.cend(),  cb);
+    ASSERT_NE(m.cend(),   cb);
+
+    ASSERT_EQ(it->first,  cb->first);
+    ASSERT_EQ(it->second, cb->second);
+  }
+
+  ASSERT_EQ(cm.end(),  cb);
+  ASSERT_EQ(cm.cend(), cb);
+  ASSERT_EQ(m.cend(),  cb);
+}
+
+void const_reverse_iterator_test(
+  map_type& m,
+  const value_list_type& vs,
+  const_reverse_iterator crb
+) {
+  const map_type& cm = static_cast<const map_type&>(m);
+
+  for (
+       value_list_type::const_reverse_iterator it = vs.rbegin();
+       it != vs.rend();
+       ++it, ++crb
+  ) {
+    ASSERT_NE(cm.rend(),  crb);
+    ASSERT_NE(cm.crend(), crb);
+    ASSERT_NE(m.crend(),  crb);
+
+    ASSERT_EQ(it->first,  crb->first);
+    ASSERT_EQ(it->second, crb->second);
+  }
+
+  ASSERT_EQ(cm.rend(),  crb);
+  ASSERT_EQ(cm.crend(), crb);
+  ASSERT_EQ(m.crend(),  crb);
+}
+
 void status_test(map_type& m, const value_list_type& vs) {
   const map_type& cm = static_cast<const map_type&>(m);
 
@@ -293,17 +343,9 @@ void status_test(map_type& m, const value_list_type& vs) {
   }
   ASSERT_EQ(m.end(), b);
 
-  const_iterator cb = cm.begin();
-  for (
-    value_list_type::const_iterator it = vs.begin();
-    it != vs.end();
-    ++it, ++cb
-  ) {
-    ASSERT_NE(cm.end(),   cb);
-    ASSERT_EQ(it->first,  cb->first);
-    ASSERT_EQ(it->second, cb->second);
-  }
-  ASSERT_EQ(cm.end(), cb);
+  const_iterator_test(m, vs, cm.begin());
+  const_iterator_test(m, vs, cm.cbegin());
+  const_iterator_test(m, vs, m.cbegin());
 
   reverse_iterator rb = m.rbegin();
   for (
@@ -317,17 +359,9 @@ void status_test(map_type& m, const value_list_type& vs) {
   }
   ASSERT_EQ(m.rend(), rb);
 
-  const_reverse_iterator crb = cm.rbegin();
-  for (
-    value_list_type::const_reverse_iterator it = vs.rbegin();
-    it != vs.rend();
-    ++it, ++crb
-  ) {
-    ASSERT_NE(cm.rend(),  crb);
-    ASSERT_EQ(it->first,  crb->first);
-    ASSERT_EQ(it->second, crb->second);
-  }
-  ASSERT_EQ(cm.rend(), crb);
+  const_reverse_iterator_test(m, vs, cm.rbegin());
+  const_reverse_iterator_test(m, vs, cm.crbegin());
+  const_reverse_iterator_test(m, vs, m.crbegin());
 
   key_compare_test(m);
   value_compare_test(m);
