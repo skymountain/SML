@@ -8,7 +8,7 @@
 #include <vector>
 #include <cstddef>
 #include <gtest/gtest.h>
-#include "sml/red_black_tree.hpp"
+#include "sml/container/red_black_tree.hpp"
 
 namespace {
 
@@ -22,7 +22,7 @@ using std::vector;
 
 using testing::StaticAssertTypeEq;
 
-typedef sml::red_black_tree<string, int> map_type;
+typedef sml::container::red_black_tree<string, int> map_type;
 typedef map_type::iterator               iterator;
 typedef map_type::const_iterator         const_iterator;
 typedef map_type::reverse_iterator       reverse_iterator;

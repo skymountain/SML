@@ -1,5 +1,5 @@
-#ifndef _SML_RED_BLACK_TREE_HPP
-#define _SML_RED_BLACK_TREE_HPP
+#ifndef _SML_CONTAINER_RED_BLACK_TREE_HPP
+#define _SML_CONTAINER_RED_BLACK_TREE_HPP
 
 #include <algorithm>
 #include <functional>
@@ -11,7 +11,7 @@
 #include "sml/ext/tuple.hpp"
 #include "sml/utility/noncopyable.hpp"
 
-namespace sml {
+namespace sml { namespace container {
 
 template<
   class Key,
@@ -20,6 +20,7 @@ template<
   class Allocator = std::allocator< std::pair<const Key, T> >
 >
 class red_black_tree {
+
 private:
   class node;
   template <class _V, class _N> class node_iterator;
@@ -183,7 +184,7 @@ private:
     }
 
   private:
-    friend class sml::red_black_tree<Key, T, Lesser, Allocator>;
+    friend class sml::container::red_black_tree<Key, T, Lesser, Allocator>;
 
     node(
       const bool        red,
@@ -343,7 +344,7 @@ private:
     }
 
   private:
-    friend class sml::red_black_tree<Key, T, Lesser, Allocator>;
+    friend class sml::container::red_black_tree<Key, T, Lesser, Allocator>;
 
     explicit node_iterator(const red_black_tree& rb_tree) :
       right_most_(rb_tree.right_most_),
@@ -1149,12 +1150,12 @@ private:
 
 template<class Key, class T, class Lesser, class Allocator>
 void swap(
-  sml::red_black_tree<Key, T, Lesser, Allocator>& l,
-  sml::red_black_tree<Key, T, Lesser, Allocator>& r
+  sml::container::red_black_tree<Key, T, Lesser, Allocator>& l,
+  sml::container::red_black_tree<Key, T, Lesser, Allocator>& r
 ) {
   l.swap(r);
 }
 
-} // namespace sml
+}} // namespace sml::container
 
 #endif
