@@ -112,11 +112,11 @@ public:
   }
 
   reference operator*() const {
-    this->base_.dereference();
+    return this->base_.dereference();
   }
 
   pointer operator->() const {
-    this->base_.base();
+    return this->base_.base();
   }
 
   bool operator==(bucket_iterator const& r) const {

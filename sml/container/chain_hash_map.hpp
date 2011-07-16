@@ -1,5 +1,5 @@
-#ifndef _SML_CHAIN_HASH_MAP_HPP
-#define _SML_CHAIN_HASH_MAP_HPP
+#ifndef _SML_CONTAINER_CHAIN_HASH_MAP_HPP
+#define _SML_CONTAINER_CHAIN_HASH_MAP_HPP
 
 #include <algorithm>
 #include <iterator>
@@ -12,7 +12,7 @@
 #include "sml/container/chain_hash/table_iterator.hpp"
 #include "sml/container/chain_hash/table.hpp"
 
-namespace sml {
+namespace sml { namespace container {
 
 template<
   class Key,
@@ -82,9 +82,13 @@ public:
     }
   }
 
-  // XXX: maximumize load factor
-  chain_hash_map(chain_hash_map const& r);
-  chain_hash_map(chain_hash_map const& r, allocator_type const& allocator);
+  chain_hash_map(chain_hash_map const& r) :
+    tbl_(r.tbl_) {
+  }
+
+  chain_hash_map(chain_hash_map const& r, allocator_type const& allocator) :
+    tbl_(r.tb_, allocator) {
+  }
 
   iterator       begin()        { return this->tbl_.begin(); }
   const_iterator begin()  const { return this->tbl_.begin(); }
@@ -103,13 +107,13 @@ public:
   const_local_iterator cbegin(size_type n) const { return this->begin(n); }
   const_local_iterator cend(size_type n)   const { return this->end(n); }
 
-  bool      empty()    const { return this->tbl_.empty; }
+  bool      empty()    const { return this->tbl_.empty(); }
   size_type size()     const { return this->tbl_.size(); }
   size_type max_size() const { return this->tbl_.max_size(); }
 
   float load_factor()     const  { return this->tbl_.load_factor(); }
   float max_load_factor() const  { return this->tbl_.max_load_factor(); }
-  float max_load_factor(float z) { return this->tbl_.max_load_factor(z); }
+  void  max_load_factor(float z) { this->tbl_.max_load_factor(z); }
 
   hasher hash_function()         const { return this->tbl_.hash_function(); }
   key_equal key_eq()             const { return this->tbl_.key_eq(); }
@@ -133,11 +137,7 @@ public:
   size_type erase(key_type const& key)     { return this->tbl_.erase(key); }
   iterator erase(const_iterator const pos) { return this->tbl_.erase(pos); }
   iterator erase(const_iterator first, const_iterator last) {
-    iterator next = last;
-    for (; first != last; ++first) {
-      next = this->erase(first);
-    }
-    return next;
+    return this->tbl_.erase(first, last);
   }
 
   void clear() { return this->tbl_.clear(); }
@@ -169,7 +169,7 @@ public:
     return this->tbl_.bucket(key);
   }
   size_type bucket_size(size_type const n) const {
-    return this->tbl_.bucket_size();
+    return this->tbl_.bucket_size(n);
   }
 
   void rehash(size_type n)  { return this->tbl_.rehash(n); }
@@ -184,10 +184,14 @@ public:
     return this->tbl_.equal_range(key);
   }
 
-  void swap(chain_hash_map& x);
+  void swap(chain_hash_map& x) {
+    this->tbl_.swap(x.tbl_);
+  }
 
-  // XXX: maximumize load factor
-  chain_hash_map& operator=(chain_hash_map const& r);
+  chain_hash_map& operator=(chain_hash_map const& r) {
+    this->tbl_.assign(r.tbl_);
+    return *this;
+  }
 
   mapped_type& operator[](key_type const& key) {
     return this->tbl_.access(key);
@@ -229,6 +233,6 @@ void swap(
   x.swap(y);
 }
 
-} // namespace sml
+}} // namespace sml::container
 
 #endif

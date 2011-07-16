@@ -3,6 +3,9 @@
 
 #include <stdexcept>
 #include <utility>
+#include <cstddef>
+#include "sml/iterator/next.hpp"
+#include "sml/utility/noncopyable.hpp"
 
 namespace sml { namespace container { namespace chain_hash_detail {
 
@@ -22,7 +25,6 @@ public:
   typedef typename types::hasher                 hasher;
   typedef typename types::key_equal              key_equal;
   typedef typename types::allocator_type         allocator_type;
-
 
   typedef typename types::bucket_type            bucket_type;
   typedef typename types::bucket_ptr             bucket_ptr;
@@ -47,6 +49,26 @@ public:
     sml::container::chain_hash_detail::const_bucket_iterator<types>
     const_local_iterator;
 
+  typedef typename sml::container::chain_hash_detail::table<types> table_type;
+  typedef table_type* table_ptr;
+
+  class Destroyer : sml::utility::noncopyable {
+  public:
+    Destroyer(table_type& tbl) : tbl_(&tbl) {
+    }
+
+    ~Destroyer() {
+      if (this->tbl_) this->tbl_->destroy();
+    }
+
+    void release() {
+      this->tbl_ = table_ptr();
+    }
+
+  private:
+    table_ptr tbl_;
+  };
+
 public:
   table(
     size_type      const  n,
@@ -58,7 +80,7 @@ public:
   ) :
     array_(),
     size_(),
-    bucket_size_(),
+    bucket_count_(),
     max_load_factor_(max_load_factor),
     hasher_(hasher),
     key_eq_(key_eq),
@@ -67,11 +89,36 @@ public:
     this->reconstruct(n);
   }
 
-  ~table() {
-    this->clear();
+  table(table const& r) :
+    array_(),
+    size_(),
+    bucket_count_(),
+    max_load_factor_(r.max_load_factor_),
+    hasher_(r.hasher_),
+    key_eq_(r.key_eq_),
+    allocator_(r.allocator_),
+    INCREMENT_RATE(r.INCREMENT_RATE) {
+    Destroyer destroyer(*this);
+    this->copy_table(r);
+    destroyer.release();
+  }
 
-    bucket_allocator_type allocator(this->allocator_);
-    allocator.destroy(this->bucket_size_, this->array_);
+  table(table const& r, allocator_type const& allocator) :
+    array_(),
+    size_(),
+    bucket_count_(),
+    max_load_factor_(r.max_load_factor_),
+    hasher_(r.hasher_),
+    key_eq_(r.key_eq_),
+    allocator_(allocator),
+    INCREMENT_RATE(r.INCREMENT_RATE) {
+    Destroyer destroyer(*this);
+    this->copy_table(r);
+    destroyer.release();
+  }
+
+  ~table() {
+    this->destroy();
   }
 
   iterator begin() {
@@ -111,18 +158,19 @@ public:
   }
 
   float load_factor() const {
-    return
-      static_cast<float>(this->size()) /
-      static_cast<float>(this->bucket_count());
+    return table_type::load_factor(this->size(), this->bucket_count());
   }
 
   float max_load_factor() const {
     return this->max_load_factor_;
   }
 
-  float max_load_factor(const float mlf) {
-    // XXX
-    return this->max_load_factor_ = mlf;
+  void max_load_factor(float const mlf) {
+    if (mlf < this->load_factor()) {
+      this->reconstruct(this->size() / mlf);
+    }
+
+    this->max_load_factor_ = mlf;
   }
 
   hasher         const& hash_function() const { return this->hasher_; }
@@ -132,7 +180,7 @@ public:
   std::pair<iterator, bool> insert(value_type const& v) {
     iterator pos = this->find(v.first);
     return pos == this->end() ?
-      std::make_pair(this->insert_impl(v), true) :
+      std::make_pair(this->insert_and_rehash(v), true) :
       std::make_pair(pos, false);
   }
 
@@ -143,13 +191,21 @@ public:
       return 0;
     }
 
-    this->erase_impl(pos);
+    this->naive_erase(pos);
     return 1;
   }
 
   iterator erase(const_iterator const pos) {
-    iterator next = increment(pos);
-    this->erase(pos);
+    iterator next = table_type::to_iterator(sml::iterator::next(pos));
+    this->naive_erase(pos);
+    return next;
+  }
+
+  iterator erase(const_iterator first, const_iterator last) {
+    iterator next = table_type::to_iterator(last);
+    for (; first != last; ++first) {
+      next = this->erase(first);
+    }
     return next;
   }
 
@@ -157,35 +213,28 @@ public:
     element_allocator_type allocator(this->get_allocator());
 
     for (size_type idx = 0; idx < this->bucket_count(); ++idx) {
-      for (local_iterator iter = this->begin(idx); iter != this->end(idx);) {
-        local_iterator tmp = increment(iter);
-        allocator.destroy(1, iter.base_.current());
-        iter = tmp;
-      }
-      this->get(idx)->head(element_ptr());
+      this->get(idx)->clear(allocator);
     }
+
+    this->size_ = 0;
   }
 
   mapped_type& at(key_type const& key) {
-    return at_impl(this->find(key), this->end());
+    return table_type::at(this->find(key), this->end());
   }
 
   mapped_type const& at(key_type const& key) const {
-    return at_impl(this->find(key), this->end());
+    return table_type::at(this->find(key), this->end());
   }
 
   iterator find(key_type const& key) {
     const_iterator pos = static_cast<table const&>(*this).find(key);
-    return iterator(
-      pos.base_.next_bucket(),
-      pos.base_.end_bucket(),
-      pos.base_.current()
-    );
+    return table_type::to_iterator(pos);
   }
 
   const_iterator find(key_type const& key) const {
     bucket_ptr const bucket = this->get(this->bucket(key));
-    return this->find_impl(bucket, key);
+    return this->find_in_bucket(bucket, key);
   }
 
   size_type count(key_type const& key) const {
@@ -193,7 +242,7 @@ public:
   }
 
   size_type bucket_count() const {
-    return this->bucket_size_;
+    return this->bucket_count_;
   }
 
   size_type max_bucket_count() const {
@@ -201,8 +250,7 @@ public:
   }
 
   size_type bucket(key_type const& key) const {
-    size_type const hash = this->hash_function()(key);
-    return hash % this->bucket_count();
+    return table_type::bucket(this->hash_function(), this->bucket_count(), key);
   }
 
   size_type bucket_size(size_type const idx) const {
@@ -210,35 +258,68 @@ public:
   }
 
   void rehash(size_type const n) {
-    if (this->bucket_count() >= n) return;
+    float const load_factor = table_type::load_factor(this->size(), n);
+    if (load_factor > this->max_load_factor()) return;
+
     this->reconstruct(n);
   }
 
   void reserve(size_type const n) {
-    this->rehash(std::ceil(static_cast<float>(n) / this->max_load_factor()));
+    this->reconstruct(
+      table_type::minimum_bucket_count(n, this->max_load_factor())
+    );
   }
 
   std::pair<const_iterator, const_iterator> equal_range(
     key_type const& key
   ) const {
     const_iterator pos = this->find(key);
-    const_iterator end = pos == this->end() ?
-      this->end() : increment(pos);
+    const_iterator next = pos == this->end() ?
+      this->end() : sml::iterator::next(pos);
 
-    return std::make_pair(pos, end);
+    return std::make_pair(pos, next);
   }
 
   std::pair<iterator, iterator> equal_range(key_type const& key) {
-    return static_cast<table const&>(*this).equal_range(key);
+    std::pair<const_iterator, const_iterator> range =
+      static_cast<table const&>(*this).equal_range(key);
+
+    return std::make_pair(
+      table_type::to_iterator(range.first),
+      table_type::to_iterator(range.second)
+    );
+  }
+
+  void swap(table& tbl) {
+    if (this == &tbl) return;
+
+    if (this->get_allocator() == tbl.get_allocator()) {
+      this->naive_swap(tbl);
+    }
+    else {
+      table this_src(tbl,   this->get_allocator());
+      this->swap(this_src);
+
+      table tbl_src(*this,  tbl.get_allocator());
+      tbl.swap(tbl_src);
+    }
+  }
+
+  void assign(table const& r) {
+    if (this != &r) {
+      table tmp(r);
+      this->swap(tmp);
+    }
   }
 
   mapped_type& access(key_type const& key) {
     bucket_ptr const bucket = this->get(this->bucket(key));
-    const_iterator pos = static_cast<table const&>(*this).find(bucket, key);
+    const_iterator pos =
+      static_cast<table const&>(*this).find_in_bucket(bucket, key);
 
     if (pos == this->end()) {
-      return this->insert_impl(bucket, std::make_pair(key, mapped_type()))
-        ->second;
+      return this->insert_and_rehash(bucket, std::make_pair(key, mapped_type()))
+                 ->second;
     }
     else {
       return pos.base_.current()->value().second;
@@ -261,34 +342,61 @@ public:
     return true;
   }
 
+  void destroy() {
+    this->clear();
+
+    bucket_allocator_type allocator(this->allocator_);
+    allocator.destroy(this->bucket_count_, this->array_);
+  }
+
 private:
+  void copy_table(table const& tbl) {
+    this->reserve(tbl.size());
+
+    for (const_iterator iter = tbl.begin(); iter != tbl.end(); ++iter) {
+      this->naive_insert(*iter);
+    }
+  }
+
   bucket_ptr get(size_type idx) const {
-    return this->array_ + static_cast<difference_type>(idx);
+    return this->array_ + static_cast<std::ptrdiff_t>(idx);
   }
 
   const_bucket_ptr end_bucket() const {
-    return this->array_ + static_cast<difference_type>(this->bucket_count());
+    return this->array_ + static_cast<std::ptrdiff_t>(this->bucket_count());
   }
 
-  void reconstruct(size_type const bucket_size) {
-    bucket_allocator_type allocator(this->allocator_);
-    allocator.construct(bucket_size, bucket_type());
+  void reconstruct(size_type const bucket_count) {
+    bucket_allocator_type allocator(this->get_allocator());
+    allocator.construct(bucket_count, bucket_type());
 
     bucket_ptr const new_array = allocator.get();
-    for (iterator iter = this->begin(); iter != this->end(); ++iter) {
-      element_ptr const element = iter.base_.current();
-      size_type   const idx     = this->bucket(element->value().first);
-      new_array[idx].push_front(element);
+    for (
+      bucket_ptr bucket_iter = this->array_;
+      bucket_iter != this->end_bucket();
+      ++bucket_iter
+    ) {
+      for (element_ptr elem_iter = bucket_iter->head(); elem_iter; ) {
+        element_ptr const next = elem_iter->next();
+        size_type   const idx  = table_type::bucket(
+          this->hash_function(),
+          bucket_count,
+          elem_iter->value().first
+        );
+
+        new_array[idx].push_front(elem_iter);
+        elem_iter = next;
+      }
     }
 
-    allocator.destroy(this->bucket_size_, this->array_);
+    allocator.destroy(this->bucket_count_, this->array_);
     allocator.release();
 
-    this->array_       = new_array;
-    this->bucket_size_ = bucket_size;
+    this->array_        = new_array;
+    this->bucket_count_ = bucket_count;
   }
 
-  const_iterator find_impl(
+  const_iterator find_in_bucket(
     bucket_ptr const  bucket,
     key_type   const& key
   ) const  {
@@ -296,44 +404,68 @@ private:
 
     for (const_local_iterator iter(bucket); iter != end; ++iter) {
       if (this->key_eq()(iter->first, key)) {
+
         return const_iterator(
-          bucket,
+          bucket + static_cast<std::ptrdiff_t>(1),
           this->end_bucket(),
           iter.base_.current()
         );
+
       }
     }
 
     return this->end();
   }
 
-  iterator insert_impl(value_type const& v) {
+  iterator insert_and_rehash(value_type const& v) {
     bucket_ptr const bucket = this->get(this->bucket(v.first));
-    return this->insert_impl(bucket, v);
+    return this->insert_and_rehash(bucket, v);
   }
 
-  iterator insert_impl(bucket_ptr const bucket, value_type const& v) {
+  iterator insert_and_rehash(bucket_ptr bucket, value_type const& v) {
     element_allocator_type allocator(this->get_allocator());
     allocator.construct(1, element_type(v));
-    element_ptr const elem = allocator.get();
 
-    bucket->push_front(elem);
-    ++this->size_;
-    allocator.release();
+    float const future_load_factor =
+      table_type::load_factor(this->size()+1, this->bucket_count());
 
-    if (this->max_load_factor() < this->load_factor()) {
+    if (future_load_factor > this->max_load_factor()) {
       double const new_size =
         static_cast<double>(this->size()) * INCREMENT_RATE;
       this->reconstruct(static_cast<size_type>(new_size));
+
+      bucket = this->get(this->bucket(v.first));
     }
+
+    element_ptr const elem = allocator.release();
+    return this->insert_into_bucket(bucket, elem);
+  }
+
+  iterator naive_insert(value_type const& v) {
+    bucket_ptr const bucket = this->get(this->bucket(v.first));
+    return this->insert_into_bucket(bucket, v);
+  }
+
+  iterator insert_into_bucket(bucket_ptr const bucket, value_type const& v) {
+    element_allocator_type allocator(this->get_allocator());
+    allocator.construct(1, element_type(v));
+
+    element_ptr const elem = allocator.release();
+
+    return this->insert_into_bucket(bucket, elem);
+  }
+
+  iterator insert_into_bucket(bucket_ptr const bucket, element_ptr const elem) {
+    bucket->push_front(elem);
+    ++this->size_;
 
     return iterator(bucket, this->end_bucket(), elem);
   }
 
-  void erase_impl(const_iterator pos) {
+  void naive_erase(const_iterator pos) {
     element_ptr const target = pos.base_.current();
     bucket_ptr  const bucket =
-      pos.base_.next_bucket() - static_cast<difference_type>(1);
+      pos.base_.next_bucket() - static_cast<std::ptrdiff_t>(1);
 
     (bucket)->erase(target);
 
@@ -341,23 +473,53 @@ private:
     element_allocator_type(this->get_allocator()).destroy(1, target);
   }
 
-  template<class Iterator>
-  static Iterator increment(Iterator x) {
-    return ++x;
+  void naive_swap(table& tbl) {
+    using std::swap;
+
+    swap(this->array_,           tbl.array_);
+    swap(this->size_,            tbl.size_);
+    swap(this->bucket_count_,    tbl.bucket_count_);
+    swap(this->max_load_factor_, tbl.max_load_factor_);
+    swap(this->hasher_,          tbl.hasher_);
+    swap(this->key_eq_,          tbl.key_eq_);
   }
 
-  static mapped_type& at_impl(const_iterator pos, const_iterator end) {
+  static size_type bucket(
+    hasher    const& hasher,
+    size_type const  bucket_count,
+    key_type  const& key
+  ) {
+    return hasher(key) % bucket_count;
+  }
+
+  static mapped_type& at(const_iterator pos, const_iterator end) {
     if (pos == end) {
       throw std::out_of_range("out of range at chain_hash_table#at");
     }
-    return pos.base_.current().value().second;
+    return pos.base_.current()->value().second;
+  }
+
+  static float load_factor(size_type size, size_type bucket_count) {
+    return static_cast<float>(size) / static_cast<float>(bucket_count);
+  }
+
+  static size_type minimum_bucket_count(size_type size, float load_factor) {
+    return std::ceil(static_cast<float>(size) / load_factor);
+  }
+
+  static iterator to_iterator(const_iterator from) {
+    return iterator(
+      from.base_.next_bucket(),
+      from.base_.end_bucket(),
+      from.base_.current()
+    );
   }
 
   double const    INCREMENT_RATE;
 
   bucket_ptr      array_;
   size_type       size_;
-  size_type       bucket_size_;
+  size_type       bucket_count_;
   float           max_load_factor_;
   hasher          hasher_;
   key_equal       key_eq_;

@@ -40,13 +40,22 @@ public:
 
   table_iterator_base(
     bucket_ptr       const first,
+    const_bucket_ptr const last
+  ) :
+    next_bucket_(first),
+    end_bucket_(last),
+    current_() {
+    this->point_next();
+  }
+
+  table_iterator_base(
+    bucket_ptr       const first,
     const_bucket_ptr const last,
-    element_ptr      const current = element_ptr()
+    element_ptr      const current
   ) :
     next_bucket_(first),
     end_bucket_(last),
     current_(current) {
-    this->point_next();
   }
 
   void assign(table_iterator_base const& r) {
@@ -102,6 +111,7 @@ class table_iterator :
   public std::iterator<
     std::forward_iterator_tag,
     typename Types::value_type,
+    typename Types::difference_type,
     typename Types::pointer,
     typename Types::reference
   > {
@@ -134,8 +144,15 @@ public:
 private:
   table_iterator(
     bucket_ptr       const first,
+    const_bucket_ptr const last
+  ) :
+    base_(first, last) {
+  }
+
+  table_iterator(
+    bucket_ptr       const first,
     const_bucket_ptr const last,
-    element_ptr      const current = element_ptr()
+    element_ptr      const current
   ) :
     base_(first, last, current) {
   }
@@ -191,6 +208,7 @@ class const_table_iterator :
   public std::iterator<
     std::forward_iterator_tag,
     typename Types::value_type,
+    typename Types::difference_type,
     typename Types::pointer,
     typename Types::reference
   > {
@@ -227,8 +245,15 @@ public:
 private:
   const_table_iterator(
     bucket_ptr       const first,
+    const_bucket_ptr const last
+  ) :
+    base_(first, last) {
+  }
+
+  const_table_iterator(
+    bucket_ptr       const first,
     const_bucket_ptr const last,
-    element_ptr      const current = element_ptr()
+    element_ptr      const current
   ) :
     base_(first, last, current) {
   }
