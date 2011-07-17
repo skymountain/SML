@@ -51,32 +51,58 @@ public:
   typedef typename table_type::const_local_iterator const_local_iterator;
 
 private:
-  static size_type const BUCKETS_SIZE    = 17;
+  static size_type const BUCKETS_COUNT   = 17;
   static float     const MAX_LOAD_FACTOR = 1.0f;
   static double    const INCREMENT_RATE  = 1.5;
 
 public:
   explicit chain_hash_map(
-    size_type      const  n         = BUCKETS_SIZE,
+    size_type      const  n         = BUCKETS_COUNT,
     hasher         const& hasher    = hasher(),
     key_equal      const& key_eq    = key_equal(),
     allocator_type const& allocator = allocator_type()
   ) :
-    tbl_(n, MAX_LOAD_FACTOR, hasher, key_eq, allocator, INCREMENT_RATE) {
+    tbl_(
+      INCREMENT_RATE,
+      BUCKETS_COUNT,
+      n,
+      MAX_LOAD_FACTOR,
+      hasher,
+      key_eq,
+      allocator
+    ) {
   }
 
-  chain_hash_map(allocator_type const& allocator);
+  explicit chain_hash_map(allocator_type const& allocator) :
+    tbl_(
+      INCREMENT_RATE,
+      BUCKETS_COUNT,
+      BUCKETS_COUNT,
+      MAX_LOAD_FACTOR,
+      hasher(),
+      key_equal(),
+      allocator
+    ) {
+  }
 
   template<class InputIterator>
   chain_hash_map(
     InputIterator         first,
     InputIterator  const  last,
-    size_type      const  n         = BUCKETS_SIZE,
+    size_type      const  n         = BUCKETS_COUNT,
     hasher         const& hasher    = hasher(),
     key_equal      const& key_eq    = key_equal(),
     allocator_type const& allocator = allocator_type()
   ) :
-    tbl_(n, MAX_LOAD_FACTOR, hasher, key_eq, allocator, INCREMENT_RATE) {
+    tbl_(
+      INCREMENT_RATE,
+      BUCKETS_COUNT,
+      n,
+      MAX_LOAD_FACTOR,
+      hasher,
+      key_eq,
+      allocator
+    ) {
     for (; first != last; ++first) {
       this->tbl_.insert(*first);
     }

@@ -71,47 +71,51 @@ public:
 
 public:
   table(
+    double         const  increment_rate,
+    size_type      const  initial_bucket_count,
     size_type      const  n,
     float          const  max_load_factor,
     hasher         const& hasher,
     key_equal      const& key_eq,
-    allocator_type const& allocator,
-    double         const  increment_rate
+    allocator_type const& allocator
   ) :
+    INCREMENT_RATE(increment_rate),
+    INITIAL_BUCKET_COUNT(initial_bucket_count),
     array_(),
     size_(),
     bucket_count_(),
     max_load_factor_(max_load_factor),
     hasher_(hasher),
     key_eq_(key_eq),
-    allocator_(allocator),
-    INCREMENT_RATE(increment_rate) {
+    allocator_(allocator) {
     this->reconstruct(n);
   }
 
   table(table const& r) :
+    INCREMENT_RATE(r.INCREMENT_RATE),
+    INITIAL_BUCKET_COUNT(r.INITIAL_BUCKET_COUNT),
     array_(),
     size_(),
     bucket_count_(),
     max_load_factor_(r.max_load_factor_),
     hasher_(r.hasher_),
     key_eq_(r.key_eq_),
-    allocator_(r.allocator_),
-    INCREMENT_RATE(r.INCREMENT_RATE) {
+    allocator_(r.allocator_) {
     Destroyer destroyer(*this);
     this->copy_table(r);
     destroyer.release();
   }
 
   table(table const& r, allocator_type const& allocator) :
+    INCREMENT_RATE(r.INCREMENT_RATE),
+    INITIAL_BUCKET_COUNT(r.INITIAL_BUCKET_COUNT),
     array_(),
     size_(),
     bucket_count_(),
     max_load_factor_(r.max_load_factor_),
     hasher_(r.hasher_),
     key_eq_(r.key_eq_),
-    allocator_(allocator),
-    INCREMENT_RATE(r.INCREMENT_RATE) {
+    allocator_(allocator) {
     Destroyer destroyer(*this);
     this->copy_table(r);
     destroyer.release();
@@ -515,7 +519,8 @@ private:
     );
   }
 
-  double const    INCREMENT_RATE;
+  double    const INCREMENT_RATE;
+  size_type const INITIAL_BUCKET_COUNT;
 
   bucket_ptr      array_;
   size_type       size_;
