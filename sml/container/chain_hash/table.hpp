@@ -261,7 +261,9 @@ public:
     return this->get(idx)->size();
   }
 
-  void rehash(size_type const n) {
+  void rehash(size_type n) {
+    if (n <= 0) n = INITIAL_BUCKET_COUNT;
+
     float const load_factor = table_type::load_factor(this->size(), n);
     if (load_factor > this->max_load_factor()) return;
 
@@ -269,7 +271,7 @@ public:
   }
 
   void reserve(size_type const n) {
-    this->reconstruct(
+    this->rehash(
       table_type::minimum_bucket_count(n, this->max_load_factor())
     );
   }
