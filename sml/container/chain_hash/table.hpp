@@ -202,11 +202,11 @@ public:
   }
 
   iterator erase(const_iterator first, const_iterator last) {
-    iterator next = table_type::to_iterator(last);
-    for (; first != last; ++first) {
-      next = this->erase(first);
+    iterator iter = table_type::to_iterator(first);
+    while (iter.base_.current() != last.base_.current()) {
+      iter = this->erase(iter);
     }
-    return next;
+    return iter;
   }
 
   void clear() {
