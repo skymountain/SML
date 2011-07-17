@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -16,6 +17,7 @@ using namespace std;
 namespace {
 
 using std::advance;
+using std::allocator;
 using std::ceil;
 using std::make_pair;
 using std::out_of_range;
@@ -154,20 +156,6 @@ protected:
       this->values2.push_back(make_pair("can", 214));
       this->values2.push_back(make_pair("cao", 215));
     }
-
-    // cout << " -------------- START" << endl;
-    // for (iterator iter = map2.begin(); iter != map2.end(); ++iter) {
-    //   cout << iter->first << endl;
-    // }
-
-    // iterator pos = this->map2.find("aaa");
-    // if (pos == this->map2.end()) {
-    //   cout << "NOT FOUND: aaa" << endl;
-    // }
-    // else {
-    //   cout << pos->first << endl;
-    // }
-    // cout << "Insert Finalize: " << map2.size() << endl;
   }
 
   map_type map1;
@@ -449,6 +437,51 @@ TEST(ChainHashMap, Empty) {
   map_type m;
 
   ASSERT_EQ(m.begin(), m.end());
+  status_test(m, value_list_type());
+}
+
+// --------------------------
+// ---- COPY CONSTRUCTOR ----
+// --------------------------
+
+TEST_F(ChainHashMapFixiture, CopyConstructor) {
+  {
+    map_type m1;
+    map_type m2(m1);
+    status_test(m2, value_list_type());
+  }
+
+  {
+    map_type m(this->map1);
+    status_test(m, this->values1);
+  }
+
+  {
+    map_type m(this->map2);
+    status_test(m, this->values2);
+  }
+}
+
+// ----------------
+// ---- ASSIGN ----
+// ----------------
+
+TEST_F(ChainHashMapFixiture, Assign) {
+  map_type m;
+
+  m = this->map1;
+
+  ASSERT_EQ(m.max_load_factor(), m.load_factor());
+  status_test(m, this->values1);
+
+  m = this->map2;
+
+  ASSERT_EQ(m.max_load_factor(), m.load_factor());
+  status_test(m, this->values2);
+
+  m = map_type();
+
+  ASSERT_EQ(0, m.load_factor());
   status_test(m, value_list_type());
 }
 
@@ -840,9 +873,74 @@ TEST_F(ChainHashMapFixiture, Rehash) {
     ASSERT_EQ(bucket_count, m.bucket_count());
     status_test(m, this->values1);
   }
+
+  {
+    map_type m = this->map1;
+    m.rehash(0);
+
+    status_test(m, this->values1);
+  }
 }
 
-// XXX: reserver, assign, copy constructor, max_load_factor
+// ------------------
+// ---- RESERVE -----
+// ------------------
+
+TEST_F(ChainHashMapFixiture, Reserve) {
+  float max_load_factor = this->map1.max_load_factor();
+
+  {
+    map_type m = this->map1;
+    m.reserve(m.size()+1);
+
+    ASSERT_EQ(max_load_factor, m.max_load_factor());
+    status_test(m, this->values1);
+  }
+
+  {
+    map_type m = this->map1;
+    m.reserve(m.size()-1);
+
+    ASSERT_EQ(max_load_factor, m.max_load_factor());
+    status_test(m, this->values1);
+  }
+
+  {
+    map_type m = this->map1;
+    m.reserve(0);
+
+    ASSERT_EQ(max_load_factor, m.max_load_factor());
+    status_test(m, this->values1);
+  }
+}
+
+// --------------------------
+// ---- Max Load Factor -----
+// --------------------------
+
+TEST_F(ChainHashMapFixiture, MaxLoadFactor) {
+  {
+    map_type m = this->map1;
+    float const bucket_count = m.bucket_count();
+    float const next_mlf = m.max_load_factor() + 1.0f;
+    m.max_load_factor(next_mlf);
+
+    ASSERT_EQ(bucket_count, m.bucket_count());
+    ASSERT_EQ(next_mlf,     m.max_load_factor());
+    status_test(m, this->values1);
+  }
+
+  {
+    map_type m = this->map1;
+    float const bucket_count = m.bucket_count();
+    float const next_mlf = m.max_load_factor() / 2.0f;
+    m.max_load_factor(next_mlf);
+
+    ASSERT_LT(bucket_count, m.bucket_count());
+    ASSERT_EQ(next_mlf,     m.max_load_factor());
+    status_test(m, this->values1);
+  }
+}
 
 } // namespace
 
