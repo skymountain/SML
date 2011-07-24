@@ -8,10 +8,9 @@ namespace sml { namespace memory {
 
 template<class Alloc>
 class allocator : Alloc, sml::utility::noncopyable {
+public:
 
   typedef Alloc base_allocator_type;
-
-public:
   typedef typename base_allocator_type::value_type      value_type;
   typedef typename base_allocator_type::pointer         pointer;
   typedef typename base_allocator_type::reference       reference;
