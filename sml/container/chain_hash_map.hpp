@@ -38,6 +38,8 @@ public:
   typedef typename table_type::key_type             key_type;
   typedef typename table_type::mapped_type          mapped_type;
   typedef typename table_type::value_type           value_type;
+  typedef typename table_type::pointer              pointer;
+  typedef typename table_type::const_pointer        const_pointer;
   typedef typename table_type::reference            reference;
   typedef typename table_type::const_reference      const_reference;
   typedef typename table_type::difference_type      difference_type;

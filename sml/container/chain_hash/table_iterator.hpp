@@ -207,10 +207,10 @@ template<class Types>
 class const_table_iterator :
   public std::iterator<
     std::forward_iterator_tag,
-    typename Types::value_type,
+    typename Types::const_value_type,
     typename Types::difference_type,
-    typename Types::pointer,
-    typename Types::reference
+    typename Types::const_pointer,
+    typename Types::const_reference
   > {
 
   template<class _Types>
@@ -227,8 +227,8 @@ private:
   typedef typename types::element_ptr         element_ptr;
 
 public:
-  typedef typename types::pointer   pointer;
-  typedef typename types::reference reference;
+  typedef typename types::const_pointer   pointer;
+  typedef typename types::const_reference reference;
 
   const_table_iterator() :
     base_() {

@@ -17,9 +17,9 @@ public:
   typedef typename types::mapped_type            mapped_type;
   typedef typename types::value_type             value_type;
   typedef typename types::pointer                pointer;
+  typedef typename types::const_pointer          const_pointer;
   typedef typename types::reference              reference;
-  typedef typename types::pointer                const_pointer;
-  typedef typename types::reference              const_reference;
+  typedef typename types::const_reference        const_reference;
   typedef typename types::difference_type        difference_type;
   typedef typename types::size_type              size_type;
   typedef typename types::hasher                 hasher;
