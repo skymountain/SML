@@ -133,12 +133,16 @@ TEST_F(Allocator, ExceptionInValueCopyConstructor) {
   size_type const size = 5;
   int const id = 7081;
 
-  try {
+  {
     allocator_type allocator;
-    allocator.construct(size, Counter(id));
-    FAIL() << "a exception must be thrown";
+    try {
+      allocator.construct(size, Counter(id));
+      FAIL() << "a exception must be thrown";
+    }
+    catch (...) {
+      ASSERT_EQ(2, Counter::count);
+    }
   }
-  catch (...) {}
 
   ASSERT_EQ(0, Counter::count);
 }
