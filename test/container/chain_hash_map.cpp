@@ -27,6 +27,8 @@ using std::string;
 using std::vector;
 using std::tr1::hash;
 
+using testing::StaticAssertTypeEq;
+
 using sml::iterator::next;
 
 typedef sml::container::chain_hash_map< string, int, hash<string> > map_type;
@@ -940,6 +942,95 @@ TEST_F(ChainHashMapFixiture, MaxLoadFactor) {
     ASSERT_EQ(next_mlf,     m.max_load_factor());
     status_test(m, this->values1);
   }
+}
+
+// ----------------
+// ---- Types -----
+// ----------------
+
+TEST(ChainHashMap, Types) {
+  typedef std::allocator< std::pair<std::string const, int> > allocator_type;
+
+  StaticAssertTypeEq<std::string, map_type::key_type>();
+  StaticAssertTypeEq<int,         map_type::mapped_type>();
+  StaticAssertTypeEq<std::pair<std::string const, int>, map_type::value_type>();
+  StaticAssertTypeEq<std::tr1::hash<string>,        map_type::hasher>();
+  StaticAssertTypeEq<std::equal_to<std::string>,    map_type::key_equal>();
+  StaticAssertTypeEq<allocator_type,                map_type::allocator_type>();
+  StaticAssertTypeEq<allocator_type::pointer,       map_type::pointer>();
+  StaticAssertTypeEq<allocator_type::const_pointer, map_type::const_pointer>();
+  StaticAssertTypeEq<allocator_type::reference,     map_type::reference>();
+  StaticAssertTypeEq<
+    allocator_type::const_reference,
+    map_type::const_reference
+  >();
+  StaticAssertTypeEq<map_type::size_type,      map_type::size_type>();
+  StaticAssertTypeEq<map_type::iterator,       map_type::iterator>();
+  StaticAssertTypeEq<map_type::const_iterator, map_type::const_iterator>();
+  StaticAssertTypeEq<map_type::local_iterator, map_type::local_iterator>();
+  StaticAssertTypeEq<
+    map_type::const_local_iterator,
+    map_type::const_local_iterator
+  >();
+}
+
+template<class Iterator>
+void test_types_in_iterator() {
+  typedef Iterator iterator_type;
+
+  StaticAssertTypeEq<
+    map_type::value_type,
+    typename iterator_type::value_type
+  >();
+  StaticAssertTypeEq<
+    map_type::value_type*,
+    typename iterator_type::pointer
+  >();
+  StaticAssertTypeEq<
+    map_type::value_type&,
+    typename iterator_type::reference
+  >();
+  StaticAssertTypeEq<
+    std::ptrdiff_t,
+    typename iterator_type::difference_type
+  >();
+  StaticAssertTypeEq<
+    std::forward_iterator_tag,
+    typename iterator_type::iterator_category
+  >();
+}
+
+template<class Iterator>
+void test_types_in_const_iterator() {
+  typedef Iterator iterator_type;
+
+  StaticAssertTypeEq<
+    map_type::value_type const,
+    typename iterator_type::value_type
+  >();
+  StaticAssertTypeEq<
+    const map_type::value_type*,
+    typename iterator_type::pointer
+  >();
+  StaticAssertTypeEq<
+    map_type::value_type const&,
+    typename iterator_type::reference
+  >();
+  StaticAssertTypeEq<
+    std::ptrdiff_t,
+    typename iterator_type::difference_type
+  >();
+  StaticAssertTypeEq<
+    std::forward_iterator_tag,
+    typename iterator_type::iterator_category
+  >();
+}
+
+TEST(ChainHashMap, TypesInIterator) {
+  test_types_in_iterator<map_type::iterator>();
+  test_types_in_const_iterator<map_type::const_iterator>();
+  test_types_in_iterator<map_type::local_iterator>();
+  test_types_in_const_iterator<map_type::const_local_iterator>();
 }
 
 } // namespace

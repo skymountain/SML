@@ -992,7 +992,7 @@ TEST_F(RedBlackTreeCompare, GreaterOrEqual) {
   ASSERT_TRUE(this->greater >= this->map);
 }
 
-TEST(RedBlackTreeType, TypesInMap) {
+TEST(RedBlackTree, Types) {
   typedef std::allocator< pair<const std::string, int> > allocator_type;
 
   StaticAssertTypeEq<std::string,               map_type::key_type>();
@@ -1026,7 +1026,7 @@ TEST(RedBlackTreeType, TypesInMap) {
   >();
 }
 
-TEST(RedBlackTreeType, TypesInIterator) {
+TEST(RedBlackTree, TypesInIterator) {
   StaticAssertTypeEq<map_type::value_type,  iterator::value_type>();
   StaticAssertTypeEq<map_type::value_type*, iterator::pointer>();
   StaticAssertTypeEq<map_type::value_type&, iterator::reference>();

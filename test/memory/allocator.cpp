@@ -4,8 +4,9 @@
 
 namespace {
 
-struct Counter {
+using testing::StaticAssertTypeEq;
 
+struct Counter {
   Counter(int i) : id(i) {
     Counter::throw_except();
     ++Counter::count;
@@ -145,6 +146,19 @@ TEST_F(Allocator, ExceptionInValueCopyConstructor) {
   }
 
   ASSERT_EQ(0, Counter::count);
+}
+
+TEST_F(Allocator, Types) {
+  typedef allocator_type::base_allocator_type base;
+
+  StaticAssertTypeEq<std::allocator<Counter>, base>();
+  StaticAssertTypeEq<base::value_type,      allocator_type::value_type>();
+  StaticAssertTypeEq<base::pointer,         allocator_type::pointer>();
+  StaticAssertTypeEq<base::const_pointer,   allocator_type::const_pointer>();
+  StaticAssertTypeEq<base::reference,       allocator_type::reference>();
+  StaticAssertTypeEq<base::const_reference, allocator_type::const_reference>();
+  StaticAssertTypeEq<base::size_type,       allocator_type::size_type>();
+  StaticAssertTypeEq<base::difference_type, allocator_type::difference_type>();
 }
 
 } // namespace
