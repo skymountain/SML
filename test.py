@@ -13,6 +13,7 @@ def test_cpp(cpp_file):
 
   if subprocess.call(['./a.out']) != 0:
     print 'Error: test for %s failed' % (cpp_file)
+    return False
 
   return True
 
@@ -28,7 +29,7 @@ def test_cpp_files(files):
     else:
       fail += 1
 
-  print 'All Tests: %s, Success Tests: %s, Failed Tests: %s' % (
+  print 'All Tests: %s, Success: %s, Failed: %s' % (
     sum,
     success,
     fail,
