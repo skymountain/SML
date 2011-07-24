@@ -7,7 +7,7 @@
 namespace sml { namespace memory {
 
 template<class Alloc>
-class allocator : Alloc {
+class allocator : Alloc, sml::utility::noncopyable {
 
   typedef Alloc base_allocator_type;
 
