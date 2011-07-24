@@ -17,19 +17,19 @@ protected:
   sml::op::lesser lesser_;
 };
 
-TEST_F(Lesser, less) {
+TEST_F(Lesser, Less) {
   for (int i = 0; i < Lesser::SIZE - 1; ++i) {
     ASSERT_TRUE(this->lesser_(this->arr_[i], this->arr_[i+1]));
   }
 }
 
-TEST_F(Lesser, greater) {
+TEST_F(Lesser, Greater) {
   for (int i = 0; i < Lesser::SIZE - 1; ++i) {
     ASSERT_FALSE(this->lesser_(this->arr_[i+1], this->arr_[i]));
   }
 }
 
-TEST_F(Lesser, equal) {
+TEST_F(Lesser, Equal) {
   for (int i = 0; i < Lesser::SIZE; ++i) {
     ASSERT_FALSE(this->lesser_(this->arr_[i], this->arr_[i]));
   }

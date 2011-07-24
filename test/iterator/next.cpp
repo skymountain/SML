@@ -3,7 +3,7 @@
 
 namespace {
 
-TEST(Next, next) {
+TEST(Next, Next) {
   int arr[] = {1, 2, 3};
   int size = sizeof(arr) / sizeof(int);
 

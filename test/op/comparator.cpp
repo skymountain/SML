@@ -17,19 +17,19 @@ protected:
   sml::op::comparator cmp_;
 };
 
-TEST_F(Comparator, less) {
+TEST_F(Comparator, Less) {
   for (int i = 0; i < Comparator::SIZE - 1; ++i) {
     ASSERT_EQ(-1, this->cmp_(this->arr_[i], this->arr_[i+1]));
   }
 }
 
-TEST_F(Comparator, greater) {
+TEST_F(Comparator, Greater) {
   for (int i = 0; i < Comparator::SIZE - 1; ++i) {
     ASSERT_EQ(1, this->cmp_(this->arr_[i+1], this->arr_[i]));
   }
 }
 
-TEST_F(Comparator, equal) {
+TEST_F(Comparator, Equal) {
   for (int i = 0; i < Comparator::SIZE; ++i) {
     ASSERT_EQ(0, this->cmp_(this->arr_[i], this->arr_[i]));
   }
