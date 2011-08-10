@@ -213,9 +213,10 @@ private:
     bool       red_;
     value_type value_;
     node_type& root_;
+
+    parent_node_type parent_;
     node_type  left_;
     node_type  right_;
-    parent_node_type parent_;
 
   public:
     static node_type create_root(
