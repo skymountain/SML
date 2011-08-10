@@ -1,6 +1,7 @@
 #include <vector>
 #include <iterator>
 #include <utility>
+#include <cstddef>
 #include <gtest/gtest.h>
 #include "sml/sort/counting_sort.hpp"
 
@@ -9,17 +10,18 @@ namespace {
 using std::vector;
 using std::pair;
 using std::make_pair;
+using std::size_t;
 
 struct id_encoder_class {
-  typedef int result_type;
+  typedef size_t result_type;
 
-  int operator()(int x) {
-    return x;
+  size_t operator()(int x) {
+    return static_cast<size_t>(x);
   }
 };
 
-const int id_encoder_fun(const int& x) {
-  return x;
+const size_t id_encoder_fun(const int& x) {
+  return static_cast<size_t>(x);
 }
 
 TEST(CountingSort, InEmptyArray) {
@@ -197,8 +199,8 @@ TEST(CountingSort, InArrayOfMillion) {
   }
 }
 
-int pair_encoder(pair<int, int> p) {
-  return p.first;
+size_t pair_encoder(pair<int, int> p) {
+  return static_cast<size_t>(p.first);
 }
 TEST(CountingSort, Stable) {
   pair<int, int> seq[5] = {
