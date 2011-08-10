@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 def test_cpp(cpp_file):
-  args = ['g++', '-Wall', cpp_file, '-lgtest', '-lpthread'];
+  args = ['g++', '-Wall', '-I.', cpp_file, '-lgtest', '-lpthread'];
   if subprocess.call(args) != 0:
     print "Error: can't compile %s" % (cpp_file)
     return False
